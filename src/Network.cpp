@@ -10,8 +10,6 @@
 #endif
 
 #include <Preferences.h>
-
-#include <ESPmDNS.h>
 #include "Network.h"
 
 

@@ -105,7 +105,7 @@ void WebContent::holiday() {
 
   // Get Holiday Api creds from preferences storage
   Preferences holidayCreds;
-  holidayCreds.begin("holidayApi", true);
+  holidayCreds.begin("holidayApi", false);
   String apiKey = holidayCreds.getString("apiKey");
   holidayCreds.end();
   url.concat("&api_key=");
@@ -119,6 +119,7 @@ void WebContent::holiday() {
   int xhttpCode = http.GET();
   if (xhttpCode > 0) {  //Check for the returning code
     webpage = http.getString();
+    Serial.println(webpage);
   } else {
     Serial.println("Error on HTTP request");
     return;

@@ -82,3 +82,17 @@ String Clock::getYearString() {
   int rc = strftime(ptr, 5, "%Y", &timeinfo);
   return ptr;
 }
+
+int Clock::getHour() {
+  if (!getLocalTime(&timeinfo)) {
+    return 0;
+  }
+  return timeinfo.tm_hour;
+}
+
+int Clock::getMinute() {
+  if (!getLocalTime(&timeinfo)) {
+    return 0;
+  }
+  return timeinfo.tm_min;
+}

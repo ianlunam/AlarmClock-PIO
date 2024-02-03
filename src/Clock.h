@@ -9,9 +9,12 @@ public:
   void update();
   void connect(const char* ssid, const char* wifipw);
   void setTime();
+  void setTime(int hh, int mm);
   String getTimeString();
   String getDateString();
   String getYearString();
+  int getHour();
+  int getMinute();
 };
 
 #endif

@@ -80,8 +80,7 @@ void soundBeeper() {
     if (snoozeHit or offHit) return;
 
     // Keep the display up to date
-    oled.setString(0, myClock.getTimeString());
-    oled.setString(1, myClock.getDateString());
+    oled.updateTime();
   }
 }
 
@@ -374,8 +373,7 @@ void setup() {
 
   // Init clock
   myClock.init();
-  oled.setString(0, myClock.getTimeString());
-  oled.setString(1, myClock.getDateString());
+  oled.updateTime();
 
   // Init web content (phols, weather)
   webContent.init();
@@ -434,7 +432,7 @@ void setup() {
       else if (error == OTA_END_ERROR) Serial.println("End Failed");
     });
 
-  ArduinoOTA.setHostname("alarmclock");
+  ArduinoOTA.setHostname("alarmclock-2");
   ArduinoOTA.begin();
 
   server.onNotFound(notFound);
@@ -448,20 +446,19 @@ void loop() {
   delay(100);  // 0.1s
 
   // Update main screen
-  oled.setString(0, myClock.getTimeString());
-  oled.setString(1, myClock.getDateString());
+  oled.updateTime();
   oled.setString(2, webContent.getWeatherString());
 
   if (myAlarms.isSnoozed()) {
     oled.setString(3, "Zzz");
   } else {
-    oled.setString(3, "");
+    oled.setString(3, "  ");
   }
 
   if (webContent.isTodayAHoliday()) {
     oled.setString(4, "Hol");
   } else {
-    oled.setString(4, "");
+    oled.setString(4, "  ");
   }
 
   // NTP check run

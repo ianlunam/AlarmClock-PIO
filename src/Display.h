@@ -6,7 +6,7 @@ class Display {
 public:
   Display();
   void init();
-  void updateDisplay();
+  void updateTime();
   void setString(int zone, String value);
 };
 
