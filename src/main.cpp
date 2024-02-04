@@ -1,26 +1,19 @@
 #include <Arduino.h>
 #include <esp_task_wdt.h>
 
-// Different machines :)
-#if defined(ESP32)
 #include <AsyncTCP.h>
-#elif defined(ESP8266)
-#include <ESPAsyncTCP.h>
-#else
-#error "This ain't a ESP8266 or ESP32!"
-#endif
 
 #include <ESPAsyncWebServer.h>
 #include <Preferences.h>
 #include <ArduinoOTA.h>
 
-#include "Network.h"
-#include "Clock.h"
-#include "Configurator.h"
-#include "WebContent.h"
-#include "Display.h"
-#include "Alarm.h"
-#include "Pitches.h"
+#include <Network.h>
+#include <Clock.h>
+#include <Configurator.h>
+#include <WebContent.h>
+#include <Display.h>
+#include <Alarm.h>
+#include <Pitches.h>
 
 
 #define SNOOZE_BUTTON 32

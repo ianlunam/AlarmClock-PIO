@@ -10,7 +10,6 @@
 #endif
 
 #include <ArduinoJson.h>
-#include <Preferences.h>
 #include <time.h>
 
 #include "WebContent.h"
@@ -103,13 +102,8 @@ void WebContent::holiday() {
   String url = PUBLIC_HOLIDAYS_URL;
   url.concat(ptr);
 
-  // Get Holiday Api creds from preferences storage
-  Preferences holidayCreds;
-  holidayCreds.begin("holidayApi", false);
-  String apiKey = holidayCreds.getString("apiKey");
-  holidayCreds.end();
   url.concat("&api_key=");
-  url.concat(apiKey);
+  url.concat(ABSTRACT_API_KEY);
   url.concat("&country=NZ");
 
   HTTPClient http;

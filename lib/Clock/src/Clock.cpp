@@ -3,8 +3,6 @@
 
 #include "Clock.h"
 
-const char* tz = "NZST-12NZDT,M9.5.0,M4.1.0/3";
-
 struct tm timeinfo;
 time_t lastUpdate;
 
@@ -44,7 +42,7 @@ void Clock::update() {
 
 
 void Clock::setTime() {
-  configTzTime(tz, "nz.pool.ntp.org");
+  configTzTime(TIMEZONE, "nz.pool.ntp.org");
   if (!getLocalTime(&timeinfo)) {
     return;
   }

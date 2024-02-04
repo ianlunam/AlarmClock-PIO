@@ -16,14 +16,7 @@
 Network::Network() {}
 
 void Network::connect() {
-  // Get WiFi creds from preferences storage
-  Preferences wifiCreds;
-  wifiCreds.begin("wifiCreds", true);
-  String ssid = wifiCreds.getString("ssid");
-  String pwd = wifiCreds.getString("password");
-  wifiCreds.end();
-
-  WiFi.begin(ssid.c_str(), pwd.c_str());
+  WiFi.begin(WIFI_SSID, WIFI_PWD);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
