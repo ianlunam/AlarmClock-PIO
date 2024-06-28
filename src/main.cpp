@@ -378,9 +378,9 @@ void setup() {
   }
 
   // Init button interrupts
-  pinMode(SNOOZE_BUTTON, INPUT);
+  pinMode(SNOOZE_BUTTON, INPUT_PULLUP);
   attachInterrupt(SNOOZE_BUTTON, toggleSnooze, RISING);
-  pinMode(OFF_BUTTON, INPUT);
+  pinMode(OFF_BUTTON, INPUT_PULLUP);
   attachInterrupt(OFF_BUTTON, toggleOff, RISING);
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {

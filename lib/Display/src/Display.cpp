@@ -10,7 +10,7 @@
 TFT_eSPI tft = TFT_eSPI();    // Invoke library, pins defined in User_Setup.h
 
 // Backlight
-uint8_t bl_pin = 25;
+uint8_t bl_pin = 26;
 uint8_t backlight = 220;
 uint8_t BL_MIN = 202;
 uint8_t BL_MAX = 220;
@@ -43,9 +43,6 @@ void Display::init() {
 void Display::setString(int zone, String value) {
     tft.setTextSize(1);
     if (zone == 2 && value != zoneData[zone]) {
-    Serial.print(zone);
-    Serial.print(": ");
-    Serial.println(value);
         tft.setTextColor(TFT_GREEN, TFT_BLACK);
         tft.setCursor (0, 120);
         tft.print("                ");
@@ -54,18 +51,12 @@ void Display::setString(int zone, String value) {
         zoneData[zone] = value;
     }
     if (zone == 3 && value != zoneData[zone]) {
-    Serial.print(zone);
-    Serial.print(": ");
-    Serial.println(value);
         tft.setTextColor(TFT_GREEN, TFT_BLACK);
         tft.setCursor (130, 110);
         tft.print(value);
         zoneData[zone] = value;
     }
     if (zone == 4 && value != zoneData[zone]) {
-    Serial.print(zone);
-    Serial.print(": ");
-    Serial.println(value);
         tft.setTextColor(TFT_GREEN, TFT_BLACK);
         tft.setCursor (140, 120);
         tft.print(value);
