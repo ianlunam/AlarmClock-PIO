@@ -2,7 +2,7 @@
 #define Configurator_h
 
 #include <Arduino.h>
-#include <Alarm.h>
+#include "Alarm.h"
 
 class Configurator {
 public:
