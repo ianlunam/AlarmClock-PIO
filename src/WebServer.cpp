@@ -272,7 +272,7 @@ void handleRoot(AsyncWebServerRequest *request) {
 
 WebServer::WebServer(){}
 
-void WebServer::start(Alarm inalarm)
+void WebServer::start(Alarm &inalarm)
 {
     webAlarm = inalarm;
 

@@ -6,7 +6,7 @@
 class WebServer {
   public:
     WebServer();
-    void start(Alarm inalarm);
+    void start(Alarm &inalarm);
 };
 
 #endif

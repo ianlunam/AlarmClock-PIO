@@ -29,7 +29,7 @@ void get_ldr(void *pvParameters)
     }
 
 }
-void Ldr::start(Display display)
+void Ldr::start(Display &display)
 {
     ldrDisplay = display;
     analogSetAttenuation(ADC_0db);
