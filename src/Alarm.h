@@ -22,7 +22,7 @@ struct AlarmEntry {
 class Alarm {
   public:
     Alarm();
-    void start(Display indisp);
+    void start(Display &indisp);
 };
 
 #endif

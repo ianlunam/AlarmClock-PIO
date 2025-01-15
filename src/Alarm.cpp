@@ -49,7 +49,7 @@ void alarm_clock(void *pvParameters)
     }
 }
 
-void Alarm::start(Display indisp)
+void Alarm::start(Display &indisp)
 {
     alarmDisplay = indisp;
     xTaskCreate(alarm_clock, "Alarm Clock", 4096, NULL, 10, NULL);

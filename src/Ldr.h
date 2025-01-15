@@ -6,7 +6,7 @@
 class Ldr {
   public:
     Ldr();
-    void start(Display display);
+    void start(Display &display);
     void stop();
 };
 

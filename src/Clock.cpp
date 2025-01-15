@@ -37,7 +37,7 @@ Clock::Clock()
 {
 }
 
-void Clock::start(Display indisp)
+void Clock::start(Display &indisp)
 {
     clockDisplay = indisp;
     xTaskCreate(display_time, "Display Time", 4096, NULL, 10, NULL);

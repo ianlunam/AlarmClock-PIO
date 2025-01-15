@@ -6,7 +6,7 @@
 class Clock {
   public:
     Clock();
-    void start(Display indisp);
+    void start(Display &indisp);
 };
 
 #endif
