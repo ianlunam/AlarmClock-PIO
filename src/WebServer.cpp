@@ -191,6 +191,8 @@ void handleSave(AsyncWebServerRequest *request) {
 
     preferences.end();
 
+    webAlarm.restart();
+
     request->redirect("/");
 }
 
@@ -225,6 +227,8 @@ void handleDelete(AsyncWebServerRequest *request) {
     preferences.putBytes("alarms", &alarmList, sizeof(alarmList));
     preferences.remove(request->getParam("name")->value().c_str());
     preferences.end();
+
+    webAlarm.restart();
 
     request->redirect("/");
 }

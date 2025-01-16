@@ -2,6 +2,7 @@
 #define Alarm_h
 #include <Arduino.h>
 #include <Display.h>
+#include "Ldr.h"
 
 struct AlarmEntry {
   char name[20];
@@ -22,7 +23,8 @@ struct AlarmEntry {
 class Alarm {
   public:
     Alarm();
-    void start(Display &indisp);
+    void start(Display &indisp, Ldr &ldr, bool &holiday);
+    void restart();
 };
 
 #endif

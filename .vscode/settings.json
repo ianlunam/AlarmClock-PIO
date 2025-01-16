@@ -2,5 +2,6 @@
     "flake8.args": [
         "--max-line-length=160",
     ],
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "files.trimFinalNewlines": true
 }

@@ -14,16 +14,18 @@ Ldr ldr;
 Alarm alarmPart;
 WebServer webServer;
 
+bool holiday = false;
+
 void setup() {
     Serial.begin(115200);
     Serial.println("Starting");
 
     display.init();
     network.connect();
-    mainClock.start(display);
     ldr.start(display);
-    alarmPart.start(display);
+    mainClock.start(display);
     webServer.start(alarmPart);
+    alarmPart.start(display, ldr, holiday);
 }
 
 void loop() {

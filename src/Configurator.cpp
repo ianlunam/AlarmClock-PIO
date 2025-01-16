@@ -137,7 +137,7 @@ String Configurator::pageMiddle PROGMEM = R"=====(
       <label for="enabled">Enabled</label><br/>
 )=====";
 
-String Configurator::editPage(AlarmEntry& alarmEntry) {
+String Configurator::editPage(AlarmEntry &alarmEntry) {
 
   String output = pageTop;
   output.concat("<label for=\"name\">Name</label>\n");
