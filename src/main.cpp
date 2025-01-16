@@ -6,6 +6,7 @@
 #include "Ldr.h"
 #include "Alarm.h"
 #include "WebServer.h"
+#include "HomeAssistant.h"
 
 Network network;
 Display display;
@@ -13,6 +14,7 @@ Clock mainClock;
 Ldr ldr;
 Alarm alarmPart;
 WebServer webServer;
+HomeAssistant homeAssistant;
 
 bool holiday = false;
 
@@ -26,6 +28,7 @@ void setup() {
     mainClock.start(display);
     webServer.start(alarmPart);
     alarmPart.start(display, ldr, holiday);
+    homeAssistant.start(display);
 }
 
 void loop() {

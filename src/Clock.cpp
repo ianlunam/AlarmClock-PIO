@@ -22,8 +22,8 @@ void display_time(void *pvParameters)
             int y = 10;
             tft.setTextColor(TFT_DARKCYAN, TFT_BLACK);
 
-            tft.setFreeFont(&FreeSerif18pt7b);
-            tft.setTextSize(3);
+            tft.setFreeFont(&FreeSansBold24pt7b);
+            tft.setTextSize(2);
             tft.fillRect(x, y, 240, 100, TFT_BLACK);
             tft.drawString(ptr, x, y);
         }
@@ -42,4 +42,3 @@ void Clock::start(Display &indisp)
     clockDisplay = indisp;
     xTaskCreate(display_time, "Display Time", 4096, NULL, 10, NULL);
 }
-

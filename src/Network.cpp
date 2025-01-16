@@ -14,7 +14,7 @@ Network::Network(){}
 
 void Network::connect()
 {
-    WiFi.begin("XXXXX", "XXXXX");
+    WiFi.begin(WIFI_SSID, WIFI_PWD);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");

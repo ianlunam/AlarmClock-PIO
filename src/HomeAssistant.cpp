@@ -12,10 +12,10 @@ PubSubClient client(espClient);
 Display mqttDisplay;
 
 const char *mqtt_broker = "mqtt.local";
-const char *weather_topic = "";
-const char *holiday_topic = "";
-const char *temperature_topic = "";
-const char *humidity_topic = "";
+const char *weather_topic = "homeassistant/weather/forecast_home_2/state";
+const char *holiday_topic = "homeassistant/calendar/new_zealand_bop/state";
+const char *temperature_topic = "homeassistant/sensor/t_h_sensor_temperature/state";
+const char *humidity_topic = "homeassistant/sensor/t_h_sensor_humidity/state";
 byte on_state[] = {'o','n'};
 const int mqtt_port = 1883;
 
@@ -24,6 +24,17 @@ void callback(char *topic, byte *payload, unsigned int length) {
     TFT_eSPI tft = mqttDisplay.get_tft();
     tft.setFreeFont(&FreeSerif18pt7b);
     tft.setTextSize(1);
+    Serial.print("Topic: ");
+    Serial.println(topic);
+    Serial.print("Length: ");
+    Serial.println(length);
+
+    String content = "";
+    for (size_t i = 0; i < length; i++)
+    {
+        content.concat((char)payload[i]);
+    }
+    Serial.println(content);
 
     if (strcmp(topic, weather_topic))
     {
@@ -58,6 +69,10 @@ void connect(){
             vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
     }
+    client.subscribe(weather_topic);
+    client.subscribe(holiday_topic);
+    client.subscribe(temperature_topic);
+    client.subscribe(humidity_topic);
 }
 
 void get_mqtt(void *pvParameters)
@@ -66,7 +81,8 @@ void get_mqtt(void *pvParameters)
         if (!client.connected()) {
             connect();
         }
-        vTaskDelay(30000 / portTICK_PERIOD_MS);
+        client.loop();
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
 
