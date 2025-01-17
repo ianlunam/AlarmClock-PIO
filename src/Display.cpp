@@ -6,6 +6,7 @@
 #include "Display.h"
 
 TFT_eSPI tft = TFT_eSPI();
+
 XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
 
 #define LEDC_CHANNEL_0     0
@@ -34,8 +35,8 @@ void Display::init()
     ledcSetup(LEDC_CHANNEL_0, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
     ledcAttachPin(TFT_BL, LEDC_CHANNEL_0);
 #endif
-    ledcAnalogWrite(LEDC_CHANNEL_0, BL_MIN);
-    
+    ledcAnalogWrite(LEDC_CHANNEL_0, 0);
+
     // Clear the screen before writing to it
     tft.fillScreen(TFT_BLACK);
 }
