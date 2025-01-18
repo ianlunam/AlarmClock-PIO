@@ -1,6 +1,6 @@
-#include <Display.h>
+#include "Display.h"
 #include <TFT_eSPI.h>
-#include <HomeAssistant.h>
+#include "HomeAssistant.h"
 #include <iostream>
 #include <string>
 using namespace std;
@@ -102,7 +102,7 @@ void weather_sprite(void *pvParameters) {
     spr.setFreeFont(&FreeSansBold12pt7b);
     spr.setTextSize(1);
 
-    spr.createSprite(100, 40);
+    spr.createSprite(200, 25);
     spr.fillSprite(TFT_BLACK);
     spr.setTextColor(TFT_DARKCYAN);
     spr.pushSprite(10, 170);
@@ -139,17 +139,33 @@ void callback(char *topic, byte *payload, unsigned int length) {
     if (strcmp(topic, weather_topic) == 0)
     {
         memcpy(weather_now, payload, length);
+        weather_now[length] = '\0';
     }
     else if (strcmp(topic, holiday_topic) == 0)
     {
+        char content[length + 1];
+        for (size_t i = 0; i < length; i++)
+        {
+            content[i] = (char)payload[i];
+        }
+        if (strcmp(content, "on") == 0){
+            mqttAlarm.set_public_holiday(true);
+        } else if (strcmp(content, "off") == 0)
+            mqttAlarm.set_public_holiday(false);
+        {
+            Serial.printf("Bad public holiday status: '%s' '%s'\n", topic, content);
+        }
+
     }
     else if (strcmp(topic, temperature_topic) == 0)
     {
         memcpy(temperature_now, payload, length);
+        temperature_now[length] = '\0';
     }
     else if (strcmp(topic, humidity_topic) == 0)
     {
         memcpy(humidity_now, payload, length);
+        humidity_now[length] = '\0';
     }
     else
     {

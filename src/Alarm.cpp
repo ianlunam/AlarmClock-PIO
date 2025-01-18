@@ -2,8 +2,6 @@
 #include "Alarm.h"
 #include "Screamer.h"
 
-#include <SPI.h>
-#include <XPT2046_Bitbang.h>
 #include <TFT_eSPI.h>
 #include <Preferences.h>
 
@@ -12,8 +10,6 @@ Display alarmDisplay;
 Ldr alarmLdr;
 Screamer screamer = Screamer();
 bool alarmHoliday = false;
-
-XPT2046_Bitbang ts(XPT2046_MOSI, XPT2046_MISO, XPT2046_CLK, XPT2046_CS);
 
 TFT_eSPI_Button stop_button;
 TFT_eSPI_Button snooze_button;
@@ -313,20 +309,11 @@ void Alarm::set_public_holiday(bool state) {
 void alarm_clock(void *pvParameters)
 {
     getAlarmList();
-    TouchPoint p = ts.getTouch();
     for(;;) {
         vTaskDelay(100 / portTICK_PERIOD_MS);
         if (false) {
             snooze_button = drawButton("Snooze", 300, 60);
             stop_button = drawButton("Stop", 300, 120);
-        }
-        TouchPoint tp = ts.getTouch();
-        if (tp.x != 0 && tp.y != 0) {
-             Serial.print("I've been touched at ");
-             Serial.print(tp.x);
-             Serial.print("x");
-             Serial.print(tp.y);
-             Serial.println("!");
         }
     }
 }

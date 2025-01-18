@@ -33,5 +33,6 @@ void setup() {
 
 void loop() {
     network.check();
-    vTaskDelay(300 / portTICK_PERIOD_MS);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
 }
