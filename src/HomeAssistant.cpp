@@ -13,6 +13,7 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 Display mqttDisplay;
+Alarm mqttAlarm;
 
 const char *mqtt_broker = "mqtt.local";
 const char *weather_topic = "homeassistant/weather/forecast_home_2/state";
@@ -22,8 +23,12 @@ const char *humidity_topic = "homeassistant/sensor/t_h_sensor_humidity/state";
 byte on_state[] = {'o','n'};
 const int mqtt_port = 1883;
 
-char temperature_now[5];
-char temperature_then[5];
+char temperature_now[20];
+char temperature_then[20];
+char humidity_now[20];
+char humidity_then[20];
+char weather_now[20];
+char weather_then[20];
 
 void temperature_sprite(void *pvParameters) {
     Serial.println("Starting temp loop");
@@ -35,23 +40,86 @@ void temperature_sprite(void *pvParameters) {
     spr.setFreeFont(&FreeSansBold12pt7b);
     spr.setTextSize(1);
 
-    spr.createSprite(70, 40);
+    spr.createSprite(100, 40);
     spr.fillSprite(TFT_BLACK);
     spr.setTextColor(TFT_DARKCYAN);
     spr.pushSprite(10, 200);
 
     for(;;) {
         if (strcmp(temperature_now, temperature_then) != 0) {
-            Serial.printf("New temperature: %s", temperature_now);
-            strncpy(temperature_then, temperature_now, 4);
+            Serial.printf("New temperature: %s\n", temperature_now);
+            strncpy(temperature_then, temperature_now, strlen(temperature_now));
             spr.fillSprite(TFT_BLACK);
-            char x[5];
-            char c[] = "C";
+            char x[21];
+            snprintf(x, 20, "%sC", temperature_now);
 
-            strncpy(x, temperature_now, 4);
-            strcat(x, c);
             spr.drawString(x, 0, 0);
             spr.pushSprite(10, 200);
+        }
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+
+}
+
+void humidity_sprite(void *pvParameters) {
+    Serial.println("Starting humid loop");
+
+    TFT_eSPI tft = mqttDisplay.get_tft();
+    TFT_eSprite spr = TFT_eSprite(&tft);
+
+    spr.setColorDepth(8);
+    spr.setFreeFont(&FreeSansBold12pt7b);
+    spr.setTextSize(1);
+
+    spr.createSprite(100, 40);
+    spr.fillSprite(TFT_BLACK);
+    spr.setTextColor(TFT_DARKCYAN);
+    spr.pushSprite(110, 200);
+
+    for(;;) {
+        if (strcmp(humidity_now, humidity_then) != 0) {
+            Serial.printf("New humidity: %s\n", humidity_now);
+            strncpy(humidity_then, humidity_now, strlen(humidity_now));
+            spr.fillSprite(TFT_BLACK);
+            char x[21];
+            snprintf(x, 20, "%s%%", humidity_now);
+
+            spr.drawString(x, 0, 0);
+            spr.pushSprite(110, 200);
+        }
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+
+}
+
+void weather_sprite(void *pvParameters) {
+    Serial.println("Starting weather loop");
+
+    TFT_eSPI tft = mqttDisplay.get_tft();
+    TFT_eSprite spr = TFT_eSprite(&tft);
+
+    spr.setColorDepth(8);
+    spr.setFreeFont(&FreeSansBold12pt7b);
+    spr.setTextSize(1);
+
+    spr.createSprite(100, 40);
+    spr.fillSprite(TFT_BLACK);
+    spr.setTextColor(TFT_DARKCYAN);
+    spr.pushSprite(10, 170);
+
+    for(;;) {
+        if (strcmp(weather_now, weather_then) != 0) {
+            Serial.printf("New weather: %s\n", weather_now);
+            strncpy(weather_then, weather_now, strlen(weather_now));
+            spr.fillSprite(TFT_BLACK);
+            char x[21];
+            snprintf(x, 20, "%s", weather_now);
+            if (isalpha(x[0])) {
+                x[0] = toupper(x[0]);
+            }
+
+            spr.drawString(x, 0, 0);
+            spr.pushSprite(10, 170);
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
@@ -64,36 +132,34 @@ void callback(char *topic, byte *payload, unsigned int length) {
     tft.setFreeFont(&FreeSerif18pt7b);
     tft.setTextSize(1);
     Serial.print("Topic: ");
-    Serial.println(topic);
-    Serial.print("Length: ");
+    Serial.print(topic);
+    Serial.print(" Length: ");
     Serial.println(length);
-
-    String content = "";
-    for (size_t i = 0; i < length; i++)
-    {
-        content.concat((char)payload[i]);
-    }
-    Serial.println(content);
-
 
     if (strcmp(topic, weather_topic) == 0)
     {
+        memcpy(weather_now, payload, length);
     }
     else if (strcmp(topic, holiday_topic) == 0)
     {
     }
     else if (strcmp(topic, temperature_topic) == 0)
     {
-        Serial.printf("New temp: %s\n", content);
-        memcpy(temperature_now, payload, 4);
+        memcpy(temperature_now, payload, length);
     }
     else if (strcmp(topic, humidity_topic) == 0)
     {
-        Serial.printf("New humid: %s\n", content);
+        memcpy(humidity_now, payload, length);
     }
     else
     {
-        Serial.printf("Dunnow: '%s' '%s'\n", topic, content);
+        String content = "";
+        for (size_t i = 0; i < length; i++)
+        {
+            content.concat((char)payload[i]);
+        }
+
+        Serial.printf("Dunno: '%s' '%s'\n", topic, content);
     }
 
 }
@@ -133,9 +199,12 @@ void get_mqtt(void *pvParameters)
 
 HomeAssistant::HomeAssistant(){}
 
-void HomeAssistant::start(Display &indisp)
+void HomeAssistant::start(Display &indisp, Alarm &inalarm)
 {
     mqttDisplay = indisp;
+    mqttAlarm = inalarm;
     xTaskCreate(get_mqtt, "Display MQTT Data", 4096, NULL, 10, NULL);
     xTaskCreate(temperature_sprite, "Temerature", 4096, NULL, 10, NULL);
+    xTaskCreate(humidity_sprite, "Humidity", 4096, NULL, 10, NULL);
+    xTaskCreate(weather_sprite, "Weather", 4096, NULL, 10, NULL);
 }

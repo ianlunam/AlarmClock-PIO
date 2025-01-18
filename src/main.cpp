@@ -28,7 +28,7 @@ void setup() {
     mainClock.start(display);
     webServer.start(alarmPart);
     alarmPart.start(display, ldr, holiday);
-    homeAssistant.start(display);
+    homeAssistant.start(display, alarmPart);
 }
 
 void loop() {
