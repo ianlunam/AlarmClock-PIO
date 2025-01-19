@@ -1,13 +1,10 @@
 #include <Arduino.h>
 #include <lvgl.h>
 #include <TFT_eSPI.h>
-#include <XPT2046_Touchscreen.h>
 
 #include "Display.h"
 
 TFT_eSPI tft = TFT_eSPI();
-
-XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
 
 #define LEDC_CHANNEL_0     0
 #define LEDC_TIMER_12_BIT  12

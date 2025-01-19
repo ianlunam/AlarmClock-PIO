@@ -40,7 +40,7 @@ void temperature_sprite(void *pvParameters) {
     spr.setFreeFont(&FreeSansBold12pt7b);
     spr.setTextSize(1);
 
-    spr.createSprite(100, 40);
+    spr.createSprite(80, 25);
     spr.fillSprite(TFT_BLACK);
     spr.setTextColor(TFT_DARKCYAN);
     spr.pushSprite(10, 200);
@@ -71,10 +71,10 @@ void humidity_sprite(void *pvParameters) {
     spr.setFreeFont(&FreeSansBold12pt7b);
     spr.setTextSize(1);
 
-    spr.createSprite(100, 40);
+    spr.createSprite(80, 25);
     spr.fillSprite(TFT_BLACK);
     spr.setTextColor(TFT_DARKCYAN);
-    spr.pushSprite(110, 200);
+    spr.pushSprite(90, 200);
 
     for(;;) {
         if (strcmp(humidity_now, humidity_then) != 0) {
@@ -85,7 +85,7 @@ void humidity_sprite(void *pvParameters) {
             snprintf(x, 20, "%s%%", humidity_now);
 
             spr.drawString(x, 0, 0);
-            spr.pushSprite(110, 200);
+            spr.pushSprite(90, 200);
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
