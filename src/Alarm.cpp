@@ -248,8 +248,9 @@ void alarm_clock(void *pvParameters)
         if (alam == true) {
             Serial.println("Alarmed");
             screamer.start();
-            snooze_button = drawButton("Snooze", 100, 150);
-            stop_button = drawButton("Stop", 260, 150);
+            // Position is center of button.
+            snooze_button = drawButton("Snooze", 100, 130, 100, 95);
+            stop_button = drawButton("Stop", 260, 130, 100, 95);
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
