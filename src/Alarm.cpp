@@ -66,7 +66,7 @@ void getAlarmList() {
 }
 
 
-bool Alarm::getAlarm(char* name, AlarmEntry& newAlarm) {
+bool getAlarm(char* name, AlarmEntry& newAlarm) {
     getAlarmList();
 
     bool inList = false;
@@ -98,39 +98,7 @@ bool Alarm::getAlarm(char* name, AlarmEntry& newAlarm) {
 }
 
 
-bool Alarm::alarming(bool isPhol) {
-    if (alarmState == ALARM_ON) {
-        return true;
-    } else if (alarmState == ALARM_SNOOZE) {
-        struct tm timeinfo;
-        if (!getLocalTime(&timeinfo)) {
-            return false;
-        }
-        time_t now = mktime(&timeinfo);
-        if (now > (alarmStarted + (60 * 7))) {
-            Serial.println("Snooze over");
-            alarmState = ALARM_ON;
-            alarmStarted = now;
-            return true;
-        }
-        return false;
-    } else {
-        struct tm timeinfo;
-        if (!getLocalTime(&timeinfo)) {
-            return false;
-        }
-        time_t now = mktime(&timeinfo);
-        if (alarmTriggerNow(isPhol)) {
-            alarmState = ALARM_ON;
-            alarmStarted = now;
-            return true;
-        }
-        return false;
-    }
-}
-
-
-bool Alarm::alarmTriggerNow(bool isPhol) {
+bool alarmTriggerNow(bool isPhol) {
     struct tm currentTm;
     if (!getLocalTime(&currentTm)) {
         return false;
@@ -199,6 +167,39 @@ bool Alarm::alarmTriggerNow(bool isPhol) {
     return false;
 }
 
+
+bool alarming(bool isPhol) {
+    if (alarmState == ALARM_ON) {
+        return true;
+    } else if (alarmState == ALARM_SNOOZE) {
+        struct tm timeinfo;
+        if (!getLocalTime(&timeinfo)) {
+            return false;
+        }
+        time_t now = mktime(&timeinfo);
+        if (now > (alarmStarted + (60 * 7))) {
+            Serial.println("Snooze over");
+            alarmState = ALARM_ON;
+            alarmStarted = now;
+            return true;
+        }
+        return false;
+    } else {
+        struct tm timeinfo;
+        if (!getLocalTime(&timeinfo)) {
+            return false;
+        }
+        time_t now = mktime(&timeinfo);
+        if (alarmTriggerNow(isPhol)) {
+            alarmState = ALARM_ON;
+            alarmStarted = now;
+            return true;
+        }
+        return false;
+    }
+}
+
+
 void Alarm::turnOff() {
     Serial.println("Alarm off button");
     alarmState = ALARM_OFF;
@@ -218,72 +219,6 @@ void Alarm::snooze() {
         return;
     }
     snoozeTime = mktime(&timeinfo);
-}
-
-
-String Alarm::toString(AlarmEntry& thisAlarm) {
-    String output = "Name: ";
-    output.concat(thisAlarm.name);
-    output.concat(" ");
-    output.concat(thisAlarm.hour);
-    output.concat(":");
-    output.concat(thisAlarm.minute);
-    output.concat(" ");
-    if (thisAlarm.sunday) {
-        output.concat("S");
-    } else {
-        output.concat(".");
-    }
-    if (thisAlarm.monday) {
-        output.concat("M");
-    } else {
-        output.concat(".");
-    }
-    if (thisAlarm.tuesday) {
-        output.concat("T");
-    } else {
-        output.concat(".");
-    }
-    if (thisAlarm.wednesday) {
-        output.concat("W");
-    } else {
-        output.concat(".");
-    }
-    if (thisAlarm.thursday) {
-        output.concat("T");
-    } else {
-        output.concat(".");
-    }
-    if (thisAlarm.friday) {
-        output.concat("F");
-    } else {
-        output.concat(".");
-    }
-    if (thisAlarm.saturday) {
-        output.concat("S");
-    } else {
-        output.concat(".");
-    }
-
-    if (thisAlarm.skip_phols) {
-        output.concat("P");
-    } else {
-        output.concat("N");
-    }
-
-    if (thisAlarm.once) {
-        output.concat("O");
-    } else {
-        output.concat("N");
-    }
-
-    if (thisAlarm.enabled) {
-        output.concat("Y");
-    } else {
-        output.concat("N");
-    }
-
-    return output;
 }
 
 bool Alarm::isSnoozed() {
@@ -308,13 +243,15 @@ void Alarm::set_public_holiday(bool state) {
 
 void alarm_clock(void *pvParameters)
 {
-    getAlarmList();
     for(;;) {
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-        if (false) {
-            snooze_button = drawButton("Snooze", 300, 60);
-            stop_button = drawButton("Stop", 300, 120);
+        bool alam = alarming(alarmHoliday);
+        if (alam == true) {
+            Serial.println("Alarmed");
+            screamer.start();
+            snooze_button = drawButton("Snooze", 100, 150);
+            stop_button = drawButton("Stop", 260, 150);
         }
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 

@@ -96,7 +96,7 @@ String alarmToTableRow(AlarmEntry &thisAlarm) {
 }
 
 
-bool getAlarm(char *name, AlarmEntry &newAlarm) {
+bool getCurrentAlarm(char *name, AlarmEntry &newAlarm) {
 
     Preferences alarmStore;
     alarmStore.begin("alarmStore", true);
@@ -123,7 +123,7 @@ void handleEdit(AsyncWebServerRequest *request) {
     }
 
     AlarmEntry alarmEntry;
-    if (getAlarm((char *)request->getParam("name")->value().c_str(), alarmEntry)) {
+    if (getCurrentAlarm((char *)request->getParam("name")->value().c_str(), alarmEntry)) {
         request->send(200, "text/html", configurator.editPage(alarmEntry));
     } else {
         request->send(404, "text/plain", request->getParam("name")->value() + " doesn't exist.");
@@ -262,7 +262,7 @@ void handleRoot(AsyncWebServerRequest *request) {
     response->print("<tr><th>Name</th><th>Time</th><th>&nbsp</th><th>&nbsp</th><th>&nbsp</th><th>&nbsp</th><th>&nbsp</th><th>&nbsp</th><th>&nbsp</th><th>Skip Holidays</th><th>Once Only</th><th>Enabled</th><th>Change</th></tr>\n");
     for (int x = 0; x < 6; x++) {
         AlarmEntry myAlarm;
-        if (getAlarm(alarmList[x], myAlarm)) {
+        if (getCurrentAlarm(alarmList[x], myAlarm)) {
         response->print(alarmToTableRow(myAlarm));
         }
     }
