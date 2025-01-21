@@ -243,14 +243,16 @@ void Alarm::set_public_holiday(bool state) {
 
 void alarm_clock(void *pvParameters)
 {
+    bool triggered = false;
     for(;;) {
-        bool alam = alarming(alarmHoliday);
-        if (alam == true) {
+        bool tmp = alarming(alarmHoliday);
+        if (tmp == true and triggered == false) {
             Serial.println("Alarmed");
-            screamer.start();
+            triggered = true;
+            // screamer.start();
             // Position is center of button.
-            snooze_button = drawButton("Snooze", 100, 130, 100, 95);
-            stop_button = drawButton("Stop", 260, 130, 100, 95);
+            // snooze_button = drawButton("Snooze", 100, 130, 100, 95);
+            // stop_button = drawButton("Stop", 260, 130, 100, 95);
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }

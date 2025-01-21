@@ -2,6 +2,8 @@
 #include <Display.h>
 #include <time.h>
 
+int clock_colour = (TEXT_R<<(5+6))|(TEXT_G<<5)|TEXT_B;
+
 struct tm timeinfo2;
 Display clockDisplay;
 
@@ -27,7 +29,8 @@ void display_time(void *pvParameters)
 
     spr.createSprite(width, height);
     spr.fillSprite(TFT_BLACK);
-    spr.setTextColor(TFT_DARKCYAN);
+    // spr.setTextColor(TFT_DARKCYAN);
+    spr.setTextColor(clock_colour);
     spr.pushSprite(x, 10);
 
     for(;;){

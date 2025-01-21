@@ -3,7 +3,8 @@
 #include <Arduino.h>
 
 int melody[] = {
-  NOTE_C6, NOTE_A5, NOTE_C6, NOTE_A5, NOTE_C6, NOTE_A5, NOTE_C6, NOTE_A5
+  // NOTE_C6, NOTE_A5, NOTE_C6, NOTE_A5, NOTE_C6, NOTE_A5, NOTE_C6, NOTE_A5
+  NOTE_C5, NOTE_A4, NOTE_C5, NOTE_A4, NOTE_C5, NOTE_A4, NOTE_C5, NOTE_A4
 };
 
 int noteDurations[] = {
@@ -31,6 +32,7 @@ Screamer::Screamer(){}
 
 void Screamer::start()
 {
+  Serial.printf("portTICK_PERIOD_MS: %d\n", portTICK_PERIOD_MS);
   xTaskCreate(sound_beeper, "Alarm!", 4096, NULL, 10, &beeperTaskHandle);
 }
 

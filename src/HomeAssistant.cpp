@@ -30,6 +30,8 @@ char humidity_then[20];
 char weather_now[20];
 char weather_then[20];
 
+int mqtt_colour = (TEXT_R<<(5+6))|(TEXT_G<<5)|TEXT_B;
+
 void temperature_sprite(void *pvParameters) {
     Serial.println("Starting temp loop");
 
@@ -42,7 +44,7 @@ void temperature_sprite(void *pvParameters) {
 
     spr.createSprite(80, 25);
     spr.fillSprite(TFT_BLACK);
-    spr.setTextColor(TFT_DARKCYAN);
+    spr.setTextColor(mqtt_colour);
     spr.pushSprite(10, 205);
 
     for(;;) {
@@ -73,7 +75,7 @@ void humidity_sprite(void *pvParameters) {
 
     spr.createSprite(80, 25);
     spr.fillSprite(TFT_BLACK);
-    spr.setTextColor(TFT_DARKCYAN);
+    spr.setTextColor(mqtt_colour);
     spr.pushSprite(90, 205);
 
     for(;;) {
@@ -104,7 +106,7 @@ void weather_sprite(void *pvParameters) {
 
     spr.createSprite(160, 25);
     spr.fillSprite(TFT_BLACK);
-    spr.setTextColor(TFT_DARKCYAN);
+    spr.setTextColor(mqtt_colour);
     spr.pushSprite(10, 180);
 
     for(;;) {
