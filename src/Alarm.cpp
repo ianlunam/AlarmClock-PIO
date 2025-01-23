@@ -4,6 +4,8 @@
 
 #include <TFT_eSPI.h>
 #include <Preferences.h>
+#include <XPT2046_Touchscreen.h>
+#include <SPI.h>
 
 struct tm timeinfo3;
 Display alarmDisplay;
@@ -13,6 +15,9 @@ bool alarmHoliday = false;
 
 TFT_eSPI_Button stop_button;
 TFT_eSPI_Button snooze_button;
+
+SPIClass mySpi = SPIClass(VSPI);
+XPT2046_Touchscreen ts(XPT2046_CS, XPT2046_IRQ);
 
 #define ALARM_OFF 0
 #define ALARM_ON 1
@@ -241,18 +246,38 @@ void Alarm::set_public_holiday(bool state) {
     alarmHoliday = state;
 }
 
+void scream(){
+    Serial.println("Alarmed");
+    screamer.start();
+    // Position is center of button.
+    snooze_button = drawButton("Snooze", 100, 130, 100, 95);
+    stop_button = drawButton("Stop", 260, 130, 100, 95);
+
+    for (;;){
+        if (ts.tirqTouched() && ts.touched()) {
+            TS_Point p = ts.getPoint();
+            Serial.print("Pressure = ");
+            Serial.print(p.z);
+            Serial.print(", x = ");
+            Serial.print(p.x);
+            Serial.print(", y = ");
+            Serial.print(p.y);
+            Serial.println();
+            break;
+        }
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+    screamer.stop();
+}
+
 void alarm_clock(void *pvParameters)
 {
-    bool triggered = false;
     for(;;) {
-        bool tmp = alarming(alarmHoliday);
-        if (tmp == true and triggered == false) {
-            Serial.println("Alarmed");
-            triggered = true;
-            // screamer.start();
-            // Position is center of button.
-            // snooze_button = drawButton("Snooze", 100, 130, 100, 95);
-            // stop_button = drawButton("Stop", 260, 130, 100, 95);
+        bool tmp = alarmTriggerNow(alarmHoliday);
+        if (tmp == true) {
+            Serial.println("Entering alarming state");
+            scream();
+            Serial.println("Exiting alarming state");
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
@@ -262,6 +287,10 @@ void Alarm::start(Display &indisp, Ldr &ldr, bool &holiday)
 {
     alarmDisplay = indisp;
     alarmLdr = ldr;
+
+    mySpi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
+    ts.begin(mySpi);
+
     xTaskCreate(alarm_clock, "Alarm Clock", 4096, NULL, 10, &alarmTaskHandle);
 }
 

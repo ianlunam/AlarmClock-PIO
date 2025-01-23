@@ -32,12 +32,13 @@ Screamer::Screamer(){}
 
 void Screamer::start()
 {
-  Serial.printf("portTICK_PERIOD_MS: %d\n", portTICK_PERIOD_MS);
-  xTaskCreate(sound_beeper, "Alarm!", 4096, NULL, 10, &beeperTaskHandle);
+    Serial.println("Staring screamer");
+    xTaskCreate(sound_beeper, "Alarm!", 4096, NULL, 20, &beeperTaskHandle);
 }
 
 void Screamer::stop()
 {
+    Serial.println("Stopping screamer");
     vTaskDelete(beeperTaskHandle);
     noTone(SPEAKER_PIN);
 }
