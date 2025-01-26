@@ -250,8 +250,8 @@ void scream(){
     Serial.println("Alarmed");
     screamer.start();
     // Position is center of button.
-    snooze_button = drawButton("Snooze", 100, 130, 100, 95);
-    stop_button = drawButton("Stop", 260, 130, 100, 95);
+    // snooze_button = drawButton("Snooze", 100, 130, 100, 95);
+    // stop_button = drawButton("Stop", 260, 130, 100, 95);
 
     for (;;){
         if (ts.tirqTouched() && ts.touched()) {
@@ -278,6 +278,8 @@ void alarm_clock(void *pvParameters)
             Serial.println("Entering alarming state");
             scream();
             Serial.println("Exiting alarming state");
+            vTaskDelay(500 / portTICK_PERIOD_MS);
+            alarmDisplay.set_backlight(BL_MAX);
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
