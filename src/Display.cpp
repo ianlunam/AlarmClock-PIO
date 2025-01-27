@@ -20,7 +20,7 @@ void ledcAnalogWrite(uint8_t channel, uint32_t value, uint32_t valueMax = 255) {
   ledcWrite(channel, duty);
 }
 
-void Display::init()
+void Display::start()
 {
     // Start the tft display and set it to black
     tft.init();
@@ -38,7 +38,7 @@ void Display::init()
     tft.fillScreen(TFT_BLACK);
 }
 
-TFT_eSPI Display::get_tft()
+TFT_eSPI& Display::get_tft()
 {
     return tft;
 }

@@ -321,4 +321,6 @@ void WebServer::start()
     server.onNotFound(notFound);
     server.begin();
 
+    Serial.println("WebServer started");
+
 }

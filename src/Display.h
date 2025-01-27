@@ -7,8 +7,8 @@
 class Display {
   public:
     Display();
-    void init();
-    TFT_eSPI get_tft();
+    void start();
+    TFT_eSPI& get_tft();
     void set_backlight(uint32_t level);
 };
 

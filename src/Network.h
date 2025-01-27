@@ -5,9 +5,7 @@
 class Network {
   public:
     Network();
-    void connect();
-    void check();
-    String ipAddress();
+    void start();
 };
 
 #endif

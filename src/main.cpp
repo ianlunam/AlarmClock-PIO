@@ -28,8 +28,8 @@ void setup() {
     digitalWrite(LED_GREEN, HIGH);
     digitalWrite(LED_BLUE, HIGH);
 
-    display.init();
-    network.connect();
+    display.start();
+    network.start();
     ldr.start(display);
     mainClock.start(display);
     webServer.start();
@@ -37,7 +37,4 @@ void setup() {
     homeAssistant.start(display, alarmPart);
 }
 
-void loop() {
-    network.check();
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-}
+void loop() {}

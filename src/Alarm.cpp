@@ -161,7 +161,7 @@ bool snooze() {
     spr.setTextSize(1);
 
     spr.createSprite(80, 25);
-    spr.fillSprite(TFT_BLACK);
+    spr.fillSprite(BACKGROUND_COLOUR);
     spr.setTextColor(snooze_colour);
     spr.drawString("Zzzz", 0, 0);
     spr.pushSprite(250, 205);
@@ -192,7 +192,7 @@ bool snooze() {
         Serial.println((snoozeStartTimestamp + (SNOOZE_PERIOD * 60)));
     }
     Serial.println("Leaving snooze loop");
-    spr.fillSprite(TFT_BLACK);
+    spr.fillSprite(BACKGROUND_COLOUR);
     spr.pushSprite(250, 205);
     spr.deleteSprite();
     Serial.println("Deleted sprite");
@@ -224,6 +224,7 @@ void scream(){
 
 void alarm_clock(void *pvParameters)
 {
+    Serial.println("Alarm started");
     for(;;) {
         if (alarmTriggerNow() == true) {
             scream();

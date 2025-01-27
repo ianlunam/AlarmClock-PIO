@@ -14,13 +14,9 @@ void get_ldr(void *pvParameters)
         int sensorValue = analogRead(LDR_PIN);
 
         if (sensorValue == 0 && backlightDown) {
-            Serial.print("Turning up backlight at ");
-            Serial.println(sensorValue);
             backlightDown = false;
             ldrDisplay.set_backlight(BL_MAX);
         } else if (sensorValue != 0 && ! backlightDown) {
-            Serial.print("Turning down backlight at ");
-            Serial.println(sensorValue);
             backlightDown = true;
             ldrDisplay.set_backlight(BL_MIN);
         }
@@ -31,6 +27,7 @@ void get_ldr(void *pvParameters)
 }
 void Ldr::start(Display &display)
 {
+    Serial.println("LDR started");
     ldrDisplay = display;
     analogSetAttenuation(ADC_0db);
     pinMode(LDR_PIN, INPUT);
