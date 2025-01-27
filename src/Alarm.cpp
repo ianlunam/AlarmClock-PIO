@@ -13,40 +13,16 @@ Ldr alarmLdr;
 Screamer screamer = Screamer();
 bool alarmHoliday = false;
 
-TFT_eSPI_Button stop_button;
-TFT_eSPI_Button snooze_button;
-
 SPIClass mySpi = SPIClass(VSPI);
 XPT2046_Touchscreen ts(XPT2046_CS, XPT2046_IRQ);
 
-#define ALARM_OFF 0
-#define ALARM_ON 1
-#define ALARM_SNOOZE 2
-
-int alarmState = ALARM_OFF;
-
 char alarmList[][20] = { "", "", "", "", "", "" };
-time_t alarmedLast[6];
-time_t snoozeTime = 0;
-time_t lastAlarmCheck = 0;
-time_t alarmStarted = 0;
+int lastAlarmCheck = 100;
 
 TaskHandle_t alarmTaskHandle = NULL;
+int snooze_colour = (TEXT_R<<(5+6))|(TEXT_G<<5)|TEXT_B;
 
 Alarm::Alarm(){}
-
-TFT_eSPI_Button drawButton(String text, uint32_t x, uint32_t y, uint32_t width = 100, uint32_t height = 50) {
-
-    TFT_eSPI tft = alarmDisplay.get_tft();
-    TFT_eSPI_Button button;
-
-    char a[] = "";
-    button.initButton(&tft, x, y, width, height, TFT_DARKCYAN, TFT_BLUE, TFT_DARKCYAN, a, 2);
-
-    button.drawButton(false, text);
-    return button;
-}
-
 
 void getAlarmList() {
   Preferences preferences;
@@ -103,19 +79,16 @@ bool getAlarm(char* name, AlarmEntry& newAlarm) {
 }
 
 
-bool alarmTriggerNow(bool isPhol) {
+bool alarmTriggerNow() {
     struct tm currentTm;
     if (!getLocalTime(&currentTm)) {
         return false;
     }
-    if (currentTm.tm_sec > 10) return false;  // Only check if in the first 10s of the minute
-
-    time_t currentTime = mktime(&currentTm);
-    if (lastAlarmCheck > (currentTime - 20)) return false;  // Only check if we last checked more than 20s ago (ie: greater than 10s)
-    lastAlarmCheck = currentTime;
+    if (currentTm.tm_min == lastAlarmCheck) return false; // Have we checked this minute?
+    lastAlarmCheck = currentTm.tm_min;
 
     currentTm.tm_sec = 0;  // reset to first second of minute to make comparison easier
-    currentTime = mktime(&currentTm);
+    time_t currentTime = mktime(&currentTm);
 
     getAlarmList();
 
@@ -131,7 +104,7 @@ bool alarmTriggerNow(bool isPhol) {
 
             // Skip the alarm if ...
             if (!nextAlarm.enabled) continue;
-            if (isPhol and nextAlarm.skip_phols) continue;
+            if (alarmHoliday and nextAlarm.skip_phols) continue;
 
             // Skip if today isn't enabled
             if (currentTm.tm_wday == 0 and !nextAlarm.sunday) continue;
@@ -154,10 +127,7 @@ bool alarmTriggerNow(bool isPhol) {
             Serial.print(currentTime);
             Serial.print(" Alarm: ");
             Serial.print(alarmTime);
-            Serial.print(" Lasttime: ");
-            Serial.println(alarmedLast[x]);
-            if (alarmTime == currentTime && alarmedLast[x] < (currentTime - 20)) {  // Using same 20s as above to debounce
-                alarmedLast[x] = currentTime;
+            if (alarmTime == currentTime) {
                 if (nextAlarm.once) {
                     nextAlarm.enabled = false;
                     Preferences preferences;
@@ -172,120 +142,97 @@ bool alarmTriggerNow(bool isPhol) {
     return false;
 }
 
-
-bool alarming(bool isPhol) {
-    if (alarmState == ALARM_ON) {
-        return true;
-    } else if (alarmState == ALARM_SNOOZE) {
-        struct tm timeinfo;
-        if (!getLocalTime(&timeinfo)) {
-            return false;
-        }
-        time_t now = mktime(&timeinfo);
-        if (now > (alarmStarted + (60 * 7))) {
-            Serial.println("Snooze over");
-            alarmState = ALARM_ON;
-            alarmStarted = now;
-            return true;
-        }
-        return false;
-    } else {
-        struct tm timeinfo;
-        if (!getLocalTime(&timeinfo)) {
-            return false;
-        }
-        time_t now = mktime(&timeinfo);
-        if (alarmTriggerNow(isPhol)) {
-            alarmState = ALARM_ON;
-            alarmStarted = now;
-            return true;
-        }
-        return false;
-    }
-}
-
-
-void Alarm::turnOff() {
-    Serial.println("Alarm off button");
-    alarmState = ALARM_OFF;
-}
-
-void Alarm::turnOn() {
-    Serial.println("Alarm on button");
-    alarmState = ALARM_ON;
-}
-
-
-void Alarm::snooze() {
-    Serial.println("Alarm snooze button");
-    alarmState = ALARM_SNOOZE;
-    struct tm timeinfo;
-    if (!getLocalTime(&timeinfo)) {
-        return;
-    }
-    snoozeTime = mktime(&timeinfo);
-}
-
-bool Alarm::isSnoozed() {
-    if (alarmState == ALARM_SNOOZE) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool Alarm::isOn() {
-    if (alarmState == ALARM_ON) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 void Alarm::set_public_holiday(bool state) {
     alarmHoliday = state;
 }
 
+bool snooze() {
+    Serial.println("Entering snooze state");
+
+    screamer.stop();
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+    alarmDisplay.set_backlight(BL_MAX);
+
+    TFT_eSPI tft = alarmDisplay.get_tft();
+    TFT_eSprite spr = TFT_eSprite(&tft);
+
+    spr.setColorDepth(8);
+    spr.setFreeFont(&FreeSansBold12pt7b);
+    spr.setTextSize(1);
+
+    spr.createSprite(80, 25);
+    spr.fillSprite(TFT_BLACK);
+    spr.setTextColor(snooze_colour);
+    spr.drawString("Zzzz", 0, 0);
+    spr.pushSprite(250, 205);
+
+    struct tm nowTm;
+    getLocalTime(&nowTm);
+    time_t snoozeStartTimestamp = mktime(&nowTm);
+
+    getLocalTime(&nowTm);
+    time_t nowTimestamp = mktime(&nowTm);
+
+    bool stop = false;
+    while (nowTimestamp < (snoozeStartTimestamp + (SNOOZE_PERIOD * 60))) {
+        if (ts.tirqTouched() && ts.touched()) {
+            TS_Point p = ts.getPoint();
+            if (p.x < 2000) {
+                stop = true;
+                break;
+            }
+        }
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+
+        getLocalTime(&nowTm);
+        nowTimestamp = mktime(&nowTm);
+        Serial.print("Now: ");
+        Serial.print(nowTimestamp);
+        Serial.print(" Unsnooze: ");
+        Serial.println((snoozeStartTimestamp + (SNOOZE_PERIOD * 60)));
+    }
+    Serial.println("Leaving snooze loop");
+    spr.fillSprite(TFT_BLACK);
+    spr.pushSprite(250, 205);
+    spr.deleteSprite();
+    Serial.println("Deleted sprite");
+    if (stop == false) {
+        screamer.start();
+    }
+    return stop;
+}
+
 void scream(){
-    Serial.println("Alarmed");
+    Serial.println("Entering alarming state");
     screamer.start();
-    // Position is center of button.
-    // snooze_button = drawButton("Snooze", 100, 130, 100, 95);
-    // stop_button = drawButton("Stop", 260, 130, 100, 95);
 
     for (;;){
         if (ts.tirqTouched() && ts.touched()) {
             TS_Point p = ts.getPoint();
-            Serial.print("Pressure = ");
-            Serial.print(p.z);
-            Serial.print(", x = ");
-            Serial.print(p.x);
-            Serial.print(", y = ");
-            Serial.print(p.y);
-            Serial.println();
-            break;
+            if (p.x < 2000) { break; }
+            if (snooze()) {
+                break;
+            }
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
     screamer.stop();
+    Serial.println("Exiting alarming state");
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+    alarmDisplay.set_backlight(BL_MAX);
 }
 
 void alarm_clock(void *pvParameters)
 {
     for(;;) {
-        bool tmp = alarmTriggerNow(alarmHoliday);
-        if (tmp == true) {
-            Serial.println("Entering alarming state");
+        if (alarmTriggerNow() == true) {
             scream();
-            Serial.println("Exiting alarming state");
-            vTaskDelay(500 / portTICK_PERIOD_MS);
-            alarmDisplay.set_backlight(BL_MAX);
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 
-void Alarm::start(Display &indisp, Ldr &ldr, bool &holiday)
+void Alarm::start(Display &indisp, Ldr &ldr)
 {
     alarmDisplay = indisp;
     alarmLdr = ldr;
@@ -293,11 +240,5 @@ void Alarm::start(Display &indisp, Ldr &ldr, bool &holiday)
     mySpi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
     ts.begin(mySpi);
 
-    xTaskCreate(alarm_clock, "Alarm Clock", 4096, NULL, 10, &alarmTaskHandle);
-}
-
-void Alarm::restart()
-{
-    vTaskDelete(alarmTaskHandle);
     xTaskCreate(alarm_clock, "Alarm Clock", 4096, NULL, 10, &alarmTaskHandle);
 }

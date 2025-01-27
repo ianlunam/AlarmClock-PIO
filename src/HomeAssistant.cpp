@@ -17,7 +17,7 @@ Alarm mqttAlarm;
 
 const char *mqtt_broker = "mqtt.local";
 const char *weather_topic = "homeassistant/weather/forecast_home_2/state";
-const char *holiday_topic = "homeassistant/calendar/new_zealand_bop/state";
+const char *holiday_topic = "homeassistant/calendar/new_zealand_auk/state";
 const char *temperature_topic = "homeassistant/sensor/t_h_sensor_temperature/state";
 const char *humidity_topic = "homeassistant/sensor/t_h_sensor_humidity/state";
 byte on_state[] = {'o','n'};
@@ -125,9 +125,7 @@ void weather_sprite(void *pvParameters) {
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
-
 }
-
 
 void callback(char *topic, byte *payload, unsigned int length) {
     TFT_eSPI tft = mqttDisplay.get_tft();
@@ -145,21 +143,16 @@ void callback(char *topic, byte *payload, unsigned int length) {
     }
     else if (strcmp(topic, holiday_topic) == 0)
     {
-        char content[length + 1];
-        for (size_t i = 0; i < length; i++)
-        {
-            content[i] = (char)payload[i];
-        }
-        if (strcmp(content, "on") == 0){
+        Serial.println("Holiday topic");
+        char on[] = "on";
+        char off[] = "off";
+        if (memcmp(payload, on, length) == 0){
             mqttAlarm.set_public_holiday(true);
-        } else if (strcmp(content, "off") == 0)
+        } else if (memcmp(payload, off, length) == 0){
             mqttAlarm.set_public_holiday(false);
-        {
-            Serial.printf("Bad public holiday status: '%s' '%s'\n", topic, content);
         }
 
-    }
-    else if (strcmp(topic, temperature_topic) == 0)
+    } else if (strcmp(topic, temperature_topic) == 0)
     {
         memcpy(temperature_now, payload, length);
         temperature_now[length] = '\0';

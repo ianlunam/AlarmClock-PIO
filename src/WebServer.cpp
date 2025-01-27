@@ -11,7 +11,6 @@
 
 AsyncWebServer server(80);
 Configurator configurator;
-Alarm webAlarm;
 
 void notFound(AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
@@ -191,8 +190,6 @@ void handleSave(AsyncWebServerRequest *request) {
 
     preferences.end();
 
-    webAlarm.restart();
-
     request->redirect("/");
 }
 
@@ -227,8 +224,6 @@ void handleDelete(AsyncWebServerRequest *request) {
     preferences.putBytes("alarms", &alarmList, sizeof(alarmList));
     preferences.remove(request->getParam("name")->value().c_str());
     preferences.end();
-
-    webAlarm.restart();
 
     request->redirect("/");
 }
@@ -276,10 +271,8 @@ void handleRoot(AsyncWebServerRequest *request) {
 
 WebServer::WebServer(){}
 
-void WebServer::start(Alarm &inalarm)
+void WebServer::start()
 {
-    webAlarm = inalarm;
-
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         handleRoot(request);
     });

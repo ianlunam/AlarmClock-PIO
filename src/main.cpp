@@ -16,8 +16,6 @@ Alarm alarmPart;
 WebServer webServer;
 HomeAssistant homeAssistant;
 
-bool holiday = false;
-
 void setup() {
     Serial.begin(115200);
     Serial.println("Starting");
@@ -34,8 +32,8 @@ void setup() {
     network.connect();
     ldr.start(display);
     mainClock.start(display);
-    webServer.start(alarmPart);
-    alarmPart.start(display, ldr, holiday);
+    webServer.start();
+    alarmPart.start(display, ldr);
     homeAssistant.start(display, alarmPart);
 }
 

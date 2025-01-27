@@ -23,13 +23,7 @@ struct AlarmEntry {
 class Alarm {
   public:
     Alarm();
-    void start(Display &indisp, Ldr &ldr, bool &holiday);
-    void restart();
-    void turnOff();
-    void turnOn();
-    void snooze();
-    bool isSnoozed();
-    bool isOn();
+    void start(Display &indisp, Ldr &ldr);
     void set_public_holiday(bool state);
 };
 

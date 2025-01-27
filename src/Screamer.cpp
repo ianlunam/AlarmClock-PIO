@@ -39,6 +39,8 @@ void Screamer::start()
 void Screamer::stop()
 {
     Serial.println("Stopping screamer");
-    vTaskDelete(beeperTaskHandle);
+    if (eTaskGetState(beeperTaskHandle) != eDeleted) {
+      vTaskDelete(beeperTaskHandle);
+    }
     noTone(SPEAKER_PIN);
 }
