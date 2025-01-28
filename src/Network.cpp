@@ -5,31 +5,32 @@
 
 Network::Network() {}
 
-void check(void *pvParameters)
+void restart(WiFiEvent_t event, WiFiEventInfo_t info)
 {
-    for (;;)
-    {
-        vTaskDelay(10000 / portTICK_PERIOD_MS);
-        if (WiFi.status() != WL_CONNECTED)
-        {
-            Serial.print(millis());
-            Serial.println("Reconnecting to WiFi...");
-            WiFi.disconnect();
-            WiFi.reconnect();
 
-            while (WiFi.status() != WL_CONNECTED)
-            {
-                delay(500);
-                Serial.print(".");
-            }
-            Serial.println("\nWiFi connected.");
-            configTzTime(TIMEZONE, NTP_SERVER);
-        }
+    Serial.println("Reconnecting to WiFi...");
+    WiFi.disconnect();
+    WiFi.reconnect();
+
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        Serial.print(".");
     }
+    Serial.println("\nWiFi connected.");
+    configTzTime(TIMEZONE, NTP_SERVER);
+}
+
+void started(WiFiEvent_t event, WiFiEventInfo_t info)
+{
+    Serial.println("WiFi Up");
 }
 
 void Network::start()
 {
+    WiFi.onEvent(restart, ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
+    WiFi.onEvent(started, ARDUINO_EVENT_WIFI_STA_CONNECTED);
+
     WiFi.begin(WIFI_SSID, WIFI_PWD);
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -38,6 +39,4 @@ void Network::start()
     }
     Serial.println("\nWiFi connected.");
     configTzTime(TIMEZONE, NTP_SERVER);
-
-    xTaskCreate(check, "Display MQTT Data", 4096, NULL, 10, NULL);
 }

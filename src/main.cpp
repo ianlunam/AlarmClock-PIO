@@ -38,4 +38,4 @@ void setup()
     homeAssistant.start(display, alarmPart);
 }
 
-void loop() {}
+void loop(){}

@@ -26,7 +26,7 @@ void display_time(void *pvParameters)
     spr.createSprite(width, height);
     spr.fillSprite(BACKGROUND_COLOUR);
     spr.setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
-    spr.pushSprite(x, 10);
+    spr.pushSprite(x, 30);
 
     for (;;)
     {
@@ -42,7 +42,7 @@ void display_time(void *pvParameters)
             uint32_t start = (width / 2) - (len / 2);
             spr.fillSprite(BACKGROUND_COLOUR);
             spr.drawString(ptr, start, 0);
-            spr.pushSprite(x, 10);
+            spr.pushSprite(x, 30);
         }
 
         vTaskDelay(100 / portTICK_PERIOD_MS);
