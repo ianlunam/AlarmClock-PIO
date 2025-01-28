@@ -1,0 +1,57 @@
+{
+	"name": "builder",
+	"dockerComposeFile": [
+		"docker-compose.yml"
+	],
+	"service": "builder",
+	"runServices": [
+		"builder"
+	],
+	"shutdownAction": "stopCompose",
+	"workspaceFolder": "/home/ian/workspace",
+	"overrideCommand": true,
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools",
+				"ms-vscode.cmake-tools",
+				"vadimcn.vscode-lldb",
+				"cheshirekow.cmake-format",
+				"ms-iot.vscode-ros",
+				"pbkit.vscode-pbkit",
+				"ryzngard.vscode-header-source",
+				"ms-python.black-formatter",
+				"ms-python.python",
+				"DotJoshJohnson.xml",
+				"ms-vscode.cpptools-extension-pack",
+				"ms-azuretools.vscode-docker",
+				"cschlosser.doxdocgen",
+				"Gruntfuggly.todo-tree",
+				"mhutchie.git-graph",
+				"iliazeus.vscode-ansi",
+				"platformio.platformio-ide"
+			],
+			"settings": {
+				"files.eol": "\n",
+				"editor.tabSize": 4,
+				"editor.formatOnSave": true,
+				"[python]": {
+					"editor.defaultFormatter": "ms-python.black-formatter",
+					"black-formatter.args": [
+						"--line-length",
+						"120"
+					]
+				},
+				"[cpp]": {
+					"editor.defaultFormatter": "ms-vscode.cpptools"
+				},
+				"[cmake]": {
+					"editor.defaultFormatter": "cheshirekow.cmake-format"
+				}
+			}
+		}
+	},
+	"forwardPorts": [
+		8008
+	]
+}

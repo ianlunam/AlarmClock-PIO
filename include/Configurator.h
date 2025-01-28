@@ -4,10 +4,12 @@
 #include <Arduino.h>
 #include "Alarm.h"
 
-class Configurator {
+class Configurator
+{
 public:
   static String editPage(AlarmEntry &alarmEntry);
   static String newPage();
+
 private:
   static String pageTop;
   static String pageMiddle;

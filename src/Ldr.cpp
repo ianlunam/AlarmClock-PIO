@@ -2,7 +2,7 @@
 #include "Ldr.h"
 #include <Display.h>
 
-Ldr::Ldr(){}
+Ldr::Ldr() {}
 
 Display ldrDisplay;
 bool backlightDown = true;
@@ -10,20 +10,23 @@ TaskHandle_t ldrTaskHandle = NULL;
 
 void get_ldr(void *pvParameters)
 {
-    for(;;){
+    for (;;)
+    {
         int sensorValue = analogRead(LDR_PIN);
 
-        if (sensorValue == 0 && backlightDown) {
+        if (sensorValue == 0 && backlightDown)
+        {
             backlightDown = false;
             ldrDisplay.set_backlight(BL_MAX);
-        } else if (sensorValue != 0 && ! backlightDown) {
+        }
+        else if (sensorValue != 0 && !backlightDown)
+        {
             backlightDown = true;
             ldrDisplay.set_backlight(BL_MIN);
         }
 
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
-
 }
 void Ldr::start(Display &display)
 {

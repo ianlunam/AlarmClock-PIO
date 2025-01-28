@@ -16,7 +16,8 @@ Alarm alarmPart;
 WebServer webServer;
 HomeAssistant homeAssistant;
 
-void setup() {
+void setup()
+{
     Serial.begin(115200);
     Serial.println("Starting");
 

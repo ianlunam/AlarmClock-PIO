@@ -4,9 +4,10 @@
     ],
     "files.trimTrailingWhitespace": true,
     "files.trimFinalNewlines": true,
+    "files.insertFinalNewline": true,
     "keyboard.dispatch": "keyCode",
     "idf.port": "/dev/ttyUSB0",
     "files.associations": {
         "*.tcc": "cpp"
-    }
+    },
 }

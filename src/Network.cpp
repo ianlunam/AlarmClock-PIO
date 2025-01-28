@@ -3,19 +3,22 @@
 #include <WiFi.h>
 #include "Network.h"
 
-Network::Network(){}
+Network::Network() {}
 
 void check(void *pvParameters)
 {
-    for(;;) {
+    for (;;)
+    {
         vTaskDelay(10000 / portTICK_PERIOD_MS);
-        if (WiFi.status() != WL_CONNECTED) {
+        if (WiFi.status() != WL_CONNECTED)
+        {
             Serial.print(millis());
             Serial.println("Reconnecting to WiFi...");
             WiFi.disconnect();
             WiFi.reconnect();
 
-            while (WiFi.status() != WL_CONNECTED) {
+            while (WiFi.status() != WL_CONNECTED)
+            {
                 delay(500);
                 Serial.print(".");
             }
@@ -28,7 +31,8 @@ void check(void *pvParameters)
 void Network::start()
 {
     WiFi.begin(WIFI_SSID, WIFI_PWD);
-    while (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED)
+    {
         delay(500);
         Serial.print(".");
     }

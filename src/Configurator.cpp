@@ -3,7 +3,6 @@
 
 // Configurator::Configurator() {}
 
-
 String Configurator::pageTop = R"=====(
 <html>
   <head>
@@ -137,7 +136,8 @@ String Configurator::pageMiddle PROGMEM = R"=====(
       <label for="enabled">Enabled</label><br/>
 )=====";
 
-String Configurator::editPage(AlarmEntry &alarmEntry) {
+String Configurator::editPage(AlarmEntry &alarmEntry)
+{
 
   String output = pageTop;
   output.concat("<label for=\"name\">Name</label>\n");
@@ -148,13 +148,16 @@ String Configurator::editPage(AlarmEntry &alarmEntry) {
   // Hour
   output.concat("<label for=\"hour\">Time</label>\n");
   output.concat("<select name=\"hour\">\n");
-  for (int x = 0; x < 24; x++) {
+  for (int x = 0; x < 24; x++)
+  {
     output.concat("<option");
-    if (x == alarmEntry.hour) {
+    if (x == alarmEntry.hour)
+    {
       output.concat(" selected");
     }
     output.concat(">");
-    if (x < 10) {
+    if (x < 10)
+    {
       output.concat("0");
     }
     output.concat(x);
@@ -165,13 +168,16 @@ String Configurator::editPage(AlarmEntry &alarmEntry) {
   // Minute
   output.concat(":");
   output.concat("<select name=\"minute\">\n");
-  for (int x = 0; x < 60; x++) {
+  for (int x = 0; x < 60; x++)
+  {
     output.concat("<option");
-    if (x == alarmEntry.minute) {
+    if (x == alarmEntry.minute)
+    {
       output.concat(" selected");
     }
     output.concat(">");
-    if (x < 10) {
+    if (x < 10)
+    {
       output.concat("0");
     }
     output.concat(x);
@@ -180,61 +186,71 @@ String Configurator::editPage(AlarmEntry &alarmEntry) {
   output.concat("</select><br/>\n");
 
   output.concat("<input type=\"checkbox\" id=\"sunday\" name=\"sunday\"");
-  if (alarmEntry.sunday) {
+  if (alarmEntry.sunday)
+  {
     output.concat(" checked=\"checked\"");
   }
   output.concat("/><label for=\"sunday\">Sunday</label><br/>");
 
   output.concat("<input type=\"checkbox\" id=\"monday\" name=\"monday\"");
-  if (alarmEntry.monday) {
+  if (alarmEntry.monday)
+  {
     output.concat(" checked=\"checked\"");
   }
   output.concat("/><label for=\"monday\">Monday</label><br/>");
 
   output.concat("<input type=\"checkbox\" id=\"tuesday\" name=\"tuesday\"");
-  if (alarmEntry.tuesday) {
+  if (alarmEntry.tuesday)
+  {
     output.concat(" checked=\"checked\"");
   }
   output.concat("/><label for=\"tuesday\">Tuesday</label><br/>");
 
   output.concat("<input type=\"checkbox\" id=\"wednesday\" name=\"wednesday\"");
-  if (alarmEntry.wednesday) {
+  if (alarmEntry.wednesday)
+  {
     output.concat(" checked=\"checked\"");
   }
   output.concat("/><label for=\"wednesday\">Wednesday</label><br/>");
 
   output.concat("<input type=\"checkbox\" id=\"thursday\" name=\"thursday\"");
-  if (alarmEntry.thursday) {
+  if (alarmEntry.thursday)
+  {
     output.concat(" checked=\"checked\"");
   }
   output.concat("/><label for=\"thursday\">Thursday</label><br/>");
 
   output.concat("<input type=\"checkbox\" id=\"friday\" name=\"friday\"");
-  if (alarmEntry.friday) {
+  if (alarmEntry.friday)
+  {
     output.concat(" checked=\"checked\"");
   }
   output.concat("/><label for=\"friday\">Friday</label><br/>");
 
   output.concat("<input type=\"checkbox\" id=\"saturday\" name=\"saturday\"");
-  if (alarmEntry.saturday) {
+  if (alarmEntry.saturday)
+  {
     output.concat(" checked=\"checked\"");
   }
   output.concat("/><label for=\"saturday\">Saturday</label><br/>");
 
   output.concat("<input type=\"checkbox\" id=\"skip_phols\" name=\"skip_phols\"");
-  if (alarmEntry.skip_phols) {
+  if (alarmEntry.skip_phols)
+  {
     output.concat(" checked=\"checked\"");
   }
   output.concat("/><label for=\"skip_phols\">Skip Holidays</label><br/>");
 
   output.concat("<input type=\"checkbox\" id=\"once\" name=\"once\"");
-  if (alarmEntry.once) {
+  if (alarmEntry.once)
+  {
     output.concat(" checked=\"checked\"");
   }
   output.concat("/><label for=\"once\">Once</label><br/>");
 
   output.concat("<input type=\"checkbox\" id=\"enabled\" name=\"enabled\"");
-  if (alarmEntry.enabled) {
+  if (alarmEntry.enabled)
+  {
     output.concat(" checked=\"checked\"");
   }
   output.concat("/><label for=\"enabled\">Enabled</label><br/>");
@@ -243,7 +259,8 @@ String Configurator::editPage(AlarmEntry &alarmEntry) {
   return output;
 }
 
-String Configurator::newPage() {
+String Configurator::newPage()
+{
   String output = pageTop;
   output.concat(pageMiddle);
   output.concat(pageBottom);

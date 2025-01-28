@@ -4,7 +4,8 @@
 #include <Display.h>
 #include "Ldr.h"
 
-struct AlarmEntry {
+struct AlarmEntry
+{
   char name[20];
   int hour;
   int minute;
@@ -20,11 +21,12 @@ struct AlarmEntry {
   bool enabled;
 };
 
-class Alarm {
-  public:
-    Alarm();
-    void start(Display &indisp, Ldr &ldr);
-    void set_public_holiday(bool state);
+class Alarm
+{
+public:
+  Alarm();
+  void start(Display &indisp, Ldr &ldr);
+  void set_public_holiday(bool state);
 };
 
 #endif

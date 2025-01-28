@@ -4,10 +4,11 @@
 #include <Display.h>
 #include "Alarm.h"
 
-class HomeAssistant {
-  public:
-    HomeAssistant();
-    void start(Display &indisp, Alarm &inalarm);
+class HomeAssistant
+{
+public:
+  HomeAssistant();
+  void start(Display &indisp, Alarm &inalarm);
 };
 
 #endif

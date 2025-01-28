@@ -21,23 +21,25 @@ void display_time(void *pvParameters)
     uint32_t width = 232;
     uint32_t height = 75;
 
-    uint32_t x = (320/2) - (width/2);
+    uint32_t x = (320 / 2) - (width / 2);
 
     spr.createSprite(width, height);
     spr.fillSprite(BACKGROUND_COLOUR);
-    spr.setTextColor((TEXT_R<<(5+6))|(TEXT_G<<5)|TEXT_B);
+    spr.setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
     spr.pushSprite(x, 10);
 
-    for(;;){
+    for (;;)
+    {
         getLocalTime(&clockTimeInfo);
         char ptr[20];
         int rc = strftime(ptr, 20, "%H:%M", &clockTimeInfo);
 
-        if (strcmp(lastValue, ptr) != 0){
+        if (strcmp(lastValue, ptr) != 0)
+        {
             strncpy(lastValue, ptr, 20);
             spr.fillSprite(BACKGROUND_COLOUR);
             uint32_t len = spr.drawString(ptr, 0, 0);
-            uint32_t start = (width/2) - (len/2);
+            uint32_t start = (width / 2) - (len / 2);
             spr.fillSprite(BACKGROUND_COLOUR);
             spr.drawString(ptr, start, 0);
             spr.pushSprite(x, 10);
@@ -45,10 +47,9 @@ void display_time(void *pvParameters)
 
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
-
 }
 
-Clock::Clock(){}
+Clock::Clock() {}
 
 void Clock::start(Display &indisp)
 {

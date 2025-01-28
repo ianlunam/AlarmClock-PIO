@@ -3,10 +3,11 @@
 #include <Arduino.h>
 #include <Display.h>
 
-class Clock {
-  public:
-    Clock();
-    void start(Display &indisp);
+class Clock
+{
+public:
+  Clock();
+  void start(Display &indisp);
 };
 
 #endif
