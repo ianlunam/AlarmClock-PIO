@@ -15,6 +15,7 @@ bool alarmHoliday = false;
 
 SPIClass mySpi = SPIClass(VSPI);
 XPT2046_Touchscreen ts(XPT2046_CS, XPT2046_IRQ);
+TFT_eSprite *spr;
 
 char alarmList[][20] = {"", "", "", "", "", ""};
 int lastAlarmCheck = 100;
@@ -180,18 +181,10 @@ bool snooze()
     vTaskDelay(500 / portTICK_PERIOD_MS);
     alarmDisplay.set_backlight(BL_MAX);
 
-    TFT_eSPI tft = alarmDisplay.get_tft();
-    TFT_eSprite spr = TFT_eSprite(&tft);
-
-    spr.setColorDepth(8);
-    spr.setFreeFont(&FreeSansBold12pt7b);
-    spr.setTextSize(1);
-
-    spr.createSprite(80, 25);
-    spr.fillSprite(BACKGROUND_COLOUR);
-    spr.setTextColor(snooze_colour);
-    spr.drawString("Zzzz", 0, 0);
-    spr.pushSprite(250, 205);
+    spr->fillSprite(BACKGROUND_COLOUR);
+    spr->setTextColor(snooze_colour);
+    spr->drawString("Zzzz", 0, 0);
+    spr->pushSprite(250, 205);
 
     struct tm nowTm;
     getLocalTime(&nowTm);
@@ -222,9 +215,9 @@ bool snooze()
         Serial.println((snoozeStartTimestamp + (SNOOZE_PERIOD * 60)));
     }
     Serial.println("Leaving snooze loop");
-    spr.fillSprite(BACKGROUND_COLOUR);
-    spr.pushSprite(250, 205);
-    spr.deleteSprite();
+    spr->fillSprite(BACKGROUND_COLOUR);
+    spr->pushSprite(250, 205);
+    spr->deleteSprite();
     Serial.println("Deleted sprite");
     if (stop == false)
     {
@@ -262,6 +255,17 @@ void scream()
 
 void alarm_clock(void *pvParameters)
 {
+
+    TFT_eSPI tft = alarmDisplay.get_tft();
+    spr = new TFT_eSprite(&tft);
+
+    spr->createSprite(80, 25);
+    spr->setColorDepth(8);
+    spr->setFreeFont(&FreeSansBold12pt7b);
+    spr->setTextSize(1);
+    spr->fillSprite(BACKGROUND_COLOUR);
+    spr->pushSprite(250, 205);
+
     Serial.println("Alarm started");
     for (;;)
     {

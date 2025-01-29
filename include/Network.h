@@ -1,12 +1,13 @@
 #ifndef Network_h
 #define Network_h
 #include <Arduino.h>
+#include "Display.h"
 
 class Network
 {
 public:
   Network();
-  void start();
+  void start(Display &display);
 };
 
 #endif

@@ -21,7 +21,6 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /dev:/dev
       - /dev/shm:/dev/shm
-      - /dev/ttyUSB0:/dev/ttyUSB0
     environment:
       - TZ=Pacific/Auckland
       - DISPLAY=$DISPLAY

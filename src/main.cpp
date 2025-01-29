@@ -30,7 +30,7 @@ void setup()
     digitalWrite(LED_BLUE, HIGH);
 
     display.start();
-    network.start();
+    network.start(display);
     ldr.start(display);
     mainClock.start(display);
     webServer.start();
