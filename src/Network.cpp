@@ -3,9 +3,10 @@
 #include <WiFi.h>
 #include "Network.h"
 
+TFT_eSprite *wifiSprite;
 
 // array size is 385
-static const byte wifi[] PROGMEM  = {
+const unsigned char wifi[] PROGMEM  = {
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
   0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x18, 0x08, 0x06, 0x00, 0x00, 0x00, 0xe0, 0x77, 0x3d,
   0xf8, 0x00, 0x00, 0x00, 0x06, 0x62, 0x4b, 0x47, 0x44, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0xa0,
@@ -34,7 +35,7 @@ static const byte wifi[] PROGMEM  = {
 };
 
 // array size is 428
-static const byte wifi_off[] PROGMEM  = {
+const unsigned char wifi_off[] PROGMEM  = {
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
   0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x18, 0x08, 0x06, 0x00, 0x00, 0x00, 0xe0, 0x77, 0x3d,
   0xf8, 0x00, 0x00, 0x00, 0x06, 0x62, 0x4b, 0x47, 0x44, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0xa0,
@@ -69,6 +70,8 @@ Network::Network() {}
 void restart(WiFiEvent_t event, WiFiEventInfo_t info)
 {
 
+    wifiSprite->drawBitmap(0, 0, wifi_off, 25, 25, (TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
+    wifiSprite->pushSprite(250, 0);
     Serial.println("Reconnecting to WiFi...");
     WiFi.disconnect();
     WiFi.reconnect();
@@ -80,15 +83,28 @@ void restart(WiFiEvent_t event, WiFiEventInfo_t info)
     }
     Serial.println("\nWiFi connected.");
     configTzTime(TIMEZONE, NTP_SERVER);
+    wifiSprite->drawBitmap(0, 0, wifi, 25, 25, (TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
+    wifiSprite->pushSprite(250, 0);
 }
 
 void started(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     Serial.println("WiFi Up");
+    wifiSprite->drawBitmap(0, 0, wifi, 25, 25, (TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
+    wifiSprite->pushSprite(250, 0);
 }
 
 void Network::start(Display &display)
 {
+
+    TFT_eSPI tft = display.get_tft();
+    wifiSprite = new TFT_eSprite(&tft);
+
+    wifiSprite->createSprite(25, 25);
+    wifiSprite->setColorDepth(8);
+    wifiSprite->fillSprite(BACKGROUND_COLOUR);
+    wifiSprite->drawBitmap(0, 0, wifi_off, 25, 25, (TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
+    wifiSprite->pushSprite(300, 0);
     WiFi.onEvent(restart, ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
     WiFi.onEvent(started, ARDUINO_EVENT_WIFI_STA_CONNECTED);
 
@@ -98,6 +114,8 @@ void Network::start(Display &display)
         delay(500);
         Serial.print(".");
     }
+    wifiSprite->drawBitmap(0, 0, wifi, 25, 25, (TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
+    wifiSprite->pushSprite(300, 0);
     Serial.println("\nWiFi connected.");
     configTzTime(TIMEZONE, NTP_SERVER);
 }

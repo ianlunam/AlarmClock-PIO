@@ -15,43 +15,43 @@ PubSubClient client(espClient);
 Display mqttDisplay;
 Alarm mqttAlarm;
 
-const char *weather_topic = "homeassistant/weather/forecast_home_2/state";
 const char *holiday_topic = "homeassistant/calendar/new_zealand_auk/state";
-const char *temperature_topic = "homeassistant/sensor/t_h_sensor_temperature/state";
 const char *humidity_topic = "homeassistant/sensor/t_h_sensor_humidity/state";
+const char *temperature_topic = "homeassistant/sensor/t_h_sensor_temperature/state";
+const char *weather_topic = "homeassistant/weather/forecast_home_2/state";
 
-TFT_eSprite *weatherSprite;
-TFT_eSprite *temperatureSprite;
+TFT_eSprite *holidaySprite;
 TFT_eSprite *humiditySprite;
+TFT_eSprite *temperatureSprite;
+TFT_eSprite *weatherSprite;
 
-void temperature_sprite()
-{
-    temperatureSprite->createSprite(80, 25);
-    temperatureSprite->setColorDepth(8);
-    temperatureSprite->setFreeFont(&FreeSansBold12pt7b);
-    temperatureSprite->setTextSize(1);
-    temperatureSprite->fillSprite(BACKGROUND_COLOUR);
-    temperatureSprite->pushSprite(10, 205);
+uint16_t holidaySpriteX = 260;
+uint16_t holidaySpriteY = 10;
+uint16_t humiditySpriteX = 90;
+uint16_t humiditySpriteY = 205;
+uint16_t temperatureSpriteX = 10;
+uint16_t temperatureSpriteY = 205;
+uint16_t weatherSpriteX = 10;
+uint16_t weatherSpriteY = 175;
+
+char H { 'H' };
+char * buffer { &H };
+
+void initSprite(TFT_eSprite *sprite, uint16_t width, uint16_t height,  uint16_t x, uint16_t y) {
+    sprite->createSprite(width, height);
+    sprite->setColorDepth(8);
+    sprite->setFreeFont(&FreeSansBold12pt7b);
+    sprite->setTextSize(1);
+    sprite->fillSprite(BACKGROUND_COLOUR);
+    sprite->pushSprite(x, y);
 }
 
-void humidity_sprite()
+void updateSprite(TFT_eSprite *sprite, char value[], uint16_t x, uint16_t y)
 {
-    humiditySprite->createSprite(80, 25);
-    humiditySprite->setColorDepth(8);
-    humiditySprite->setFreeFont(&FreeSansBold12pt7b);
-    humiditySprite->setTextSize(1);
-    humiditySprite->fillSprite(BACKGROUND_COLOUR);
-    humiditySprite->pushSprite(90, 205);
-}
-
-void weather_sprite()
-{
-    weatherSprite->createSprite(160, 25);
-    weatherSprite->setColorDepth(8);
-    weatherSprite->setFreeFont(&FreeSansBold12pt7b);
-    weatherSprite->setTextSize(1);
-    weatherSprite->fillSprite(BACKGROUND_COLOUR);
-    weatherSprite->pushSprite(10, 175);
+    sprite->fillSprite(BACKGROUND_COLOUR);
+    sprite->setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
+    sprite->drawString(value, 0, 0);
+    sprite->pushSprite(weatherSpriteX, weatherSpriteY);
 }
 
 void callback(char *topic, byte *payload, unsigned int length)
@@ -66,10 +66,7 @@ void callback(char *topic, byte *payload, unsigned int length)
         {
             value[0] = toupper(value[0]);
         }
-        weatherSprite->fillSprite(BACKGROUND_COLOUR);
-        weatherSprite->setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
-        weatherSprite->drawString(value, 0, 0);
-        weatherSprite->pushSprite(10, 175);
+        updateSprite(weatherSprite, value, weatherSpriteX, weatherSpriteY);
     }
     else if (strcmp(topic, holiday_topic) == 0)
     {
@@ -78,29 +75,25 @@ void callback(char *topic, byte *payload, unsigned int length)
         if (memcmp(payload, on, length) == 0)
         {
             mqttAlarm.set_public_holiday(true);
+            updateSprite(holidaySprite, buffer, holidaySpriteX, holidaySpriteY);
         }
         else if (memcmp(payload, off, length) == 0)
         {
             mqttAlarm.set_public_holiday(false);
+            updateSprite(holidaySprite, "", holidaySpriteX, holidaySpriteY);
         }
     }
     else if (strcmp(topic, temperature_topic) == 0)
     {
         char temp[length + 2];
         snprintf(temp, length + 2, "%sC", value);
-        temperatureSprite->fillSprite(BACKGROUND_COLOUR);
-        temperatureSprite->setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
-        temperatureSprite->drawString(temp, 0, 0);
-        temperatureSprite->pushSprite(10, 205);
+        updateSprite(temperatureSprite, temp, temperatureSpriteX, temperatureSpriteY);
     }
     else if (strcmp(topic, humidity_topic) == 0)
     {
         char humid[length + 2];
         snprintf(humid, length + 2, "%s%%", value);
-        humiditySprite->fillSprite(BACKGROUND_COLOUR);
-        humiditySprite->setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
-        humiditySprite->drawString(humid, 0, 0);
-        humiditySprite->pushSprite(90, 205);
+        updateSprite(humiditySprite, humid, humiditySpriteX, humiditySpriteY);
     }
 }
 
@@ -136,9 +129,10 @@ void get_mqtt(void *pvParameters)
     humiditySprite = new TFT_eSprite(&tft);
     weatherSprite = new TFT_eSprite(&tft);
 
-    temperature_sprite();
-    humidity_sprite();
-    weather_sprite();
+    initSprite(holidaySprite, 25, 25, holidaySpriteX, holidaySpriteY);
+    initSprite(humiditySprite, 80, 25, humiditySpriteX, humiditySpriteY);
+    initSprite(temperatureSprite, 80, 25, temperatureSpriteX, temperatureSpriteY);
+    initSprite(weatherSprite, 160, 25, weatherSpriteX, weatherSpriteY);
 
     for (;;)
     {

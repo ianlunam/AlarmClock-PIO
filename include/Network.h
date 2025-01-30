@@ -2,6 +2,7 @@
 #define Network_h
 #include <Arduino.h>
 #include "Display.h"
+#include "TFT_eSPI.h"
 
 class Network
 {
