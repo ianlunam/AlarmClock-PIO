@@ -23,6 +23,7 @@ void ledcAnalogWrite(uint8_t channel, uint32_t value, uint32_t valueMax = 255)
 
 void Display::start()
 {
+    Serial.println("Starting display");
     // Start the tft display and set it to black
     tft.init();
     tft.setRotation(1); // This is the display in landscape
@@ -36,7 +37,7 @@ void Display::start()
     ledcAnalogWrite(LEDC_CHANNEL_0, 0);
 
     // Clear the screen before writing to it
-    tft.fillScreen(TFT_BLACK);
+    tft.fillScreen(BACKGROUND_COLOUR);
 }
 
 TFT_eSPI &Display::get_tft()

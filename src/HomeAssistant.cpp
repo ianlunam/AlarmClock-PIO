@@ -25,17 +25,14 @@ TFT_eSprite *humiditySprite;
 TFT_eSprite *temperatureSprite;
 TFT_eSprite *weatherSprite;
 
-uint16_t holidaySpriteX = 260;
-uint16_t holidaySpriteY = 10;
+uint16_t holidaySpriteX = 270;
+uint16_t holidaySpriteY = 0;
 uint16_t humiditySpriteX = 90;
 uint16_t humiditySpriteY = 205;
 uint16_t temperatureSpriteX = 10;
 uint16_t temperatureSpriteY = 205;
 uint16_t weatherSpriteX = 10;
 uint16_t weatherSpriteY = 175;
-
-char H { 'H' };
-char * buffer { &H };
 
 void initSprite(TFT_eSprite *sprite, uint16_t width, uint16_t height,  uint16_t x, uint16_t y) {
     sprite->createSprite(width, height);
@@ -51,7 +48,7 @@ void updateSprite(TFT_eSprite *sprite, char value[], uint16_t x, uint16_t y)
     sprite->fillSprite(BACKGROUND_COLOUR);
     sprite->setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
     sprite->drawString(value, 0, 0);
-    sprite->pushSprite(weatherSpriteX, weatherSpriteY);
+    sprite->pushSprite(x, y);
 }
 
 void callback(char *topic, byte *payload, unsigned int length)
@@ -72,15 +69,17 @@ void callback(char *topic, byte *payload, unsigned int length)
     {
         char on[] = "on";
         char off[] = "off";
+        char hach[] = "H";
+        char nout[] = "";
         if (memcmp(payload, on, length) == 0)
         {
             mqttAlarm.set_public_holiday(true);
-            updateSprite(holidaySprite, buffer, holidaySpriteX, holidaySpriteY);
+            updateSprite(holidaySprite, nout, holidaySpriteX, holidaySpriteY);
         }
         else if (memcmp(payload, off, length) == 0)
         {
             mqttAlarm.set_public_holiday(false);
-            updateSprite(holidaySprite, "", holidaySpriteX, holidaySpriteY);
+            updateSprite(holidaySprite, hach, holidaySpriteX, holidaySpriteY);
         }
     }
     else if (strcmp(topic, temperature_topic) == 0)
@@ -125,11 +124,12 @@ void connect()
 void get_mqtt(void *pvParameters)
 {
     TFT_eSPI tft = mqttDisplay.get_tft();
+    holidaySprite = new TFT_eSprite(&tft);
     temperatureSprite = new TFT_eSprite(&tft);
     humiditySprite = new TFT_eSprite(&tft);
     weatherSprite = new TFT_eSprite(&tft);
 
-    initSprite(holidaySprite, 25, 25, holidaySpriteX, holidaySpriteY);
+    initSprite(holidaySprite, 20, 20, holidaySpriteX, holidaySpriteY);
     initSprite(humiditySprite, 80, 25, humiditySpriteX, humiditySpriteY);
     initSprite(temperatureSprite, 80, 25, temperatureSpriteX, temperatureSpriteY);
     initSprite(weatherSprite, 160, 25, weatherSpriteX, weatherSpriteY);
