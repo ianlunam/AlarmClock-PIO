@@ -8,6 +8,15 @@ using namespace std;
 #include <WiFi.h>
 #include <PubSubClient.h>
 
+#define HOLIDAY_SPRITE_X 270
+#define HOLIDAY_SPRITE_Y 5
+#define HUMIDITY_SPRITE_X 90
+#define HUMIDITY_SPRITE_Y 205
+#define TEMPERATURE_SPRITE_X 10
+#define TEMPERATURE_SPRITE_Y 205
+#define WEATHER_SPRITE_X 10
+#define WEATHER_SPRITE_Y 175
+
 // Wifi
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -25,14 +34,6 @@ TFT_eSprite *humiditySprite;
 TFT_eSprite *temperatureSprite;
 TFT_eSprite *weatherSprite;
 
-uint16_t holidaySpriteX = 270;
-uint16_t holidaySpriteY = 0;
-uint16_t humiditySpriteX = 90;
-uint16_t humiditySpriteY = 205;
-uint16_t temperatureSpriteX = 10;
-uint16_t temperatureSpriteY = 205;
-uint16_t weatherSpriteX = 10;
-uint16_t weatherSpriteY = 175;
 
 void initSprite(TFT_eSprite *sprite, uint16_t width, uint16_t height,  uint16_t x, uint16_t y) {
     sprite->createSprite(width, height);
@@ -63,7 +64,7 @@ void callback(char *topic, byte *payload, unsigned int length)
         {
             value[0] = toupper(value[0]);
         }
-        updateSprite(weatherSprite, value, weatherSpriteX, weatherSpriteY);
+        updateSprite(weatherSprite, value, WEATHER_SPRITE_X, WEATHER_SPRITE_Y);
     }
     else if (strcmp(topic, holiday_topic) == 0)
     {
@@ -74,25 +75,25 @@ void callback(char *topic, byte *payload, unsigned int length)
         if (memcmp(payload, on, length) == 0)
         {
             mqttAlarm.set_public_holiday(true);
-            updateSprite(holidaySprite, nout, holidaySpriteX, holidaySpriteY);
+            updateSprite(holidaySprite, hach, HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
         }
         else if (memcmp(payload, off, length) == 0)
         {
             mqttAlarm.set_public_holiday(false);
-            updateSprite(holidaySprite, hach, holidaySpriteX, holidaySpriteY);
+            updateSprite(holidaySprite, nout, HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
         }
     }
     else if (strcmp(topic, temperature_topic) == 0)
     {
         char temp[length + 2];
         snprintf(temp, length + 2, "%sC", value);
-        updateSprite(temperatureSprite, temp, temperatureSpriteX, temperatureSpriteY);
+        updateSprite(temperatureSprite, temp, TEMPERATURE_SPRITE_X, TEMPERATURE_SPRITE_Y);
     }
     else if (strcmp(topic, humidity_topic) == 0)
     {
         char humid[length + 2];
         snprintf(humid, length + 2, "%s%%", value);
-        updateSprite(humiditySprite, humid, humiditySpriteX, humiditySpriteY);
+        updateSprite(humiditySprite, humid, HUMIDITY_SPRITE_X, HUMIDITY_SPRITE_Y);
     }
 }
 
@@ -129,10 +130,10 @@ void get_mqtt(void *pvParameters)
     humiditySprite = new TFT_eSprite(&tft);
     weatherSprite = new TFT_eSprite(&tft);
 
-    initSprite(holidaySprite, 20, 20, holidaySpriteX, holidaySpriteY);
-    initSprite(humiditySprite, 80, 25, humiditySpriteX, humiditySpriteY);
-    initSprite(temperatureSprite, 80, 25, temperatureSpriteX, temperatureSpriteY);
-    initSprite(weatherSprite, 160, 25, weatherSpriteX, weatherSpriteY);
+    initSprite(holidaySprite, 20, 20, HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
+    initSprite(humiditySprite, 80, 25, HUMIDITY_SPRITE_X, HUMIDITY_SPRITE_Y);
+    initSprite(temperatureSprite, 80, 25, TEMPERATURE_SPRITE_X, TEMPERATURE_SPRITE_Y);
+    initSprite(weatherSprite, 160, 25, WEATHER_SPRITE_X, WEATHER_SPRITE_Y);
 
     for (;;)
     {
