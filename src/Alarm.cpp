@@ -6,6 +6,7 @@
 #include <Preferences.h>
 #include <XPT2046_Touchscreen.h>
 #include <SPI.h>
+#include <TFT_eWidget.h>
 
 struct tm timeinfo3;
 Display alarmDisplay;
@@ -15,7 +16,10 @@ bool alarmHoliday = false;
 
 SPIClass mySpi = SPIClass(VSPI);
 XPT2046_Touchscreen ts(XPT2046_CS, XPT2046_IRQ);
-TFT_eSprite *spr;
+TFT_eSprite *snoozeSprite;
+
+ButtonWidget *stopButton;
+ButtonWidget *snoozeButton;
 
 char alarmList[][20] = {"", "", "", "", "", ""};
 int lastAlarmCheck = 100;
@@ -180,10 +184,10 @@ bool snooze()
     vTaskDelay(500 / portTICK_PERIOD_MS);
     alarmDisplay.set_backlight(BL_MAX);
 
-    spr->fillSprite(BACKGROUND_COLOUR);
-    spr->setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
-    spr->drawString("Zzzz", 0, 0);
-    spr->pushSprite(250, 205);
+    snoozeSprite->fillSprite(BACKGROUND_COLOUR);
+    snoozeSprite->setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
+    snoozeSprite->drawString("Zzzz", 0, 0);
+    snoozeSprite->pushSprite(250, 205);
 
     struct tm nowTm;
     getLocalTime(&nowTm);
@@ -210,8 +214,8 @@ bool snooze()
         nowTimestamp = mktime(&nowTm);
     }
     Serial.println("Leaving snooze loop");
-    spr->fillSprite(BACKGROUND_COLOUR);
-    spr->pushSprite(250, 205);
+    snoozeSprite->fillSprite(BACKGROUND_COLOUR);
+    snoozeSprite->pushSprite(250, 205);
     if (stop == false)
     {
         screamer.start();
@@ -250,14 +254,22 @@ void alarm_clock(void *pvParameters)
 {
 
     TFT_eSPI tft = alarmDisplay.get_tft();
-    spr = new TFT_eSprite(&tft);
+    snoozeSprite = new TFT_eSprite(&tft);
 
-    spr->createSprite(80, 25);
-    spr->setColorDepth(8);
-    spr->setFreeFont(&FreeSansBold12pt7b);
-    spr->setTextSize(1);
-    spr->fillSprite(BACKGROUND_COLOUR);
-    spr->pushSprite(250, 205);
+    // Black with black surround and black text, for now.
+    stopButton = new ButtonWidget(&tft);
+    snoozeButton = new ButtonWidget(&tft);
+    stopButton->initButtonUL(10, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, "Stop", 2);
+    stopButton->drawSmoothButton(false, 3, TFT_BLACK);
+    snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, "Snooze", 2);
+    snoozeButton->drawSmoothButton(false, 3, TFT_BLACK);
+
+    snoozeSprite->createSprite(80, 25);
+    snoozeSprite->setColorDepth(8);
+    snoozeSprite->setFreeFont(&FreeSansBold12pt7b);
+    snoozeSprite->setTextSize(1);
+    snoozeSprite->fillSprite(BACKGROUND_COLOUR);
+    snoozeSprite->pushSprite(250, 205);
 
     Serial.println("Alarm started");
     for (;;)
