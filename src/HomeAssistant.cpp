@@ -70,13 +70,13 @@ void callback(char *topic, byte *payload, unsigned int length)
     {
         const char on[] = "on";
         const char off[] = "off";
-        if (memcmp(payload, off, length) == 0)
+        if (memcmp(payload, on, length) == 0)
         {
             mqttAlarm.set_public_holiday(true);
             char hach[] = "H";
             updateSprite(holidaySprite, hach, HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
         }
-        else if (memcmp(payload, on, length) == 0)
+        else if (memcmp(payload, off, length) == 0)
         {
             mqttAlarm.set_public_holiday(false);
             char nout[] = "";
