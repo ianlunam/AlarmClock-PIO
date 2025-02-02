@@ -1,6 +1,5 @@
 #ifndef Alarm_h
 #define Alarm_h
-#include <Arduino.h>
 #include <Display.h>
 #include "Ldr.h"
 
@@ -25,7 +24,7 @@ class Alarm
 {
 public:
   Alarm();
-  void start(Display &indisp, Ldr &ldr);
+  void start(const Display &indisp, const Ldr &ldr);
   void set_public_holiday(bool state);
 };
 

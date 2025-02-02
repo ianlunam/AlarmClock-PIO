@@ -1,7 +1,6 @@
 #ifndef Configurator_h
 #define Configurator_h
 
-#include <Arduino.h>
 #include "Alarm.h"
 
 class Configurator

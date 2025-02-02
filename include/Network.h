@@ -1,6 +1,5 @@
 #ifndef Network_h
 #define Network_h
-#include <Arduino.h>
 #include "Display.h"
 
 class Network

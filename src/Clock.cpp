@@ -1,5 +1,5 @@
 #include "Clock.h"
-#include <Display.h>
+#include "Display.h"
 #include <time.h>
 
 struct tm clockTimeInfo;

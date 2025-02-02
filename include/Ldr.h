@@ -1,6 +1,5 @@
 #ifndef Ldr_h
 #define Ldr_h
-#include <Arduino.h>
 #include <Display.h>
 
 class Ldr

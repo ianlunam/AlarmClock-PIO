@@ -27,7 +27,7 @@ Alarm mqttAlarm;
 const char *holiday_topic = "homeassistant/calendar/new_zealand_auk/state";
 const char *humidity_topic = "homeassistant/sensor/t_h_sensor_humidity/state";
 const char *temperature_topic = "homeassistant/sensor/t_h_sensor_temperature/state";
-const char *weather_topic = "homeassistant/weather/forecast_home_2/state";
+const char *weather_topic = "homeassistant/weather/forecast_harrisfield/state";
 
 TFT_eSprite *holidaySprite;
 TFT_eSprite *humiditySprite;
@@ -55,7 +55,7 @@ void updateSprite(TFT_eSprite *sprite, char value[], uint16_t x, uint16_t y)
 void callback(char *topic, byte *payload, unsigned int length)
 {
     char value[length + 1];
-    strncpy(value, (char *)payload, length);
+    strncpy(value, reinterpret_cast<char *>(payload), length);
     value[length] = '\0';
 
     if (strcmp(topic, weather_topic) == 0)
@@ -68,18 +68,18 @@ void callback(char *topic, byte *payload, unsigned int length)
     }
     else if (strcmp(topic, holiday_topic) == 0)
     {
-        char on[] = "on";
-        char off[] = "off";
-        char hach[] = "H";
-        char nout[] = "";
+        const char on[] = "on";
+        const char off[] = "off";
         if (memcmp(payload, on, length) == 0)
         {
             mqttAlarm.set_public_holiday(true);
+            char hach[] = "H";
             updateSprite(holidaySprite, hach, HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
         }
         else if (memcmp(payload, off, length) == 0)
         {
             mqttAlarm.set_public_holiday(false);
+            char nout[] = "";
             updateSprite(holidaySprite, nout, HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
         }
     }
@@ -148,7 +148,7 @@ void get_mqtt(void *pvParameters)
 
 HomeAssistant::HomeAssistant() {}
 
-void HomeAssistant::start(Display &display, Alarm &alarm)
+void HomeAssistant::start(const Display &display, const Alarm &alarm)
 {
     mqttDisplay = display;
     mqttAlarm = alarm;

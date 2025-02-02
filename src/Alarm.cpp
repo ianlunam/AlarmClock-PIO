@@ -21,7 +21,6 @@ char alarmList[][20] = {"", "", "", "", "", ""};
 int lastAlarmCheck = 100;
 
 TaskHandle_t alarmTaskHandle = NULL;
-int snooze_colour = (TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B;
 
 Alarm::Alarm() {}
 
@@ -36,7 +35,7 @@ void getAlarmList()
         if (size > 0)
         {
             char *buf[size + 1];
-            int result = preferences.getBytes("alarms", &buf, size);
+            preferences.getBytes("alarms", &buf, size);
             memcpy(&alarmList, buf, size);
             preferences.end();
             return;
@@ -182,7 +181,7 @@ bool snooze()
     alarmDisplay.set_backlight(BL_MAX);
 
     spr->fillSprite(BACKGROUND_COLOUR);
-    spr->setTextColor(snooze_colour);
+    spr->setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
     spr->drawString("Zzzz", 0, 0);
     spr->pushSprite(250, 205);
 
@@ -205,20 +204,14 @@ bool snooze()
                 break;
             }
         }
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
 
         getLocalTime(&nowTm);
         nowTimestamp = mktime(&nowTm);
-        Serial.print("Now: ");
-        Serial.print(nowTimestamp);
-        Serial.print(" Unsnooze: ");
-        Serial.println((snoozeStartTimestamp + (SNOOZE_PERIOD * 60)));
     }
     Serial.println("Leaving snooze loop");
     spr->fillSprite(BACKGROUND_COLOUR);
     spr->pushSprite(250, 205);
-    spr->deleteSprite();
-    Serial.println("Deleted sprite");
     if (stop == false)
     {
         screamer.start();
@@ -277,7 +270,7 @@ void alarm_clock(void *pvParameters)
     }
 }
 
-void Alarm::start(Display &indisp, Ldr &ldr)
+void Alarm::start(const Display &indisp, const Ldr &ldr)
 {
     alarmDisplay = indisp;
     alarmLdr = ldr;

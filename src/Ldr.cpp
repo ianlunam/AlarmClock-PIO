@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include "Ldr.h"
 #include <Display.h>
 

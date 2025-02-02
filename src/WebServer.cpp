@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include <AsyncTCP.h>
 
 #include <ESPAsyncWebServer.h>
@@ -139,7 +138,7 @@ bool getCurrentAlarm(char *name, AlarmEntry &newAlarm)
         if (size > 0)
         {
             char *buf[size + 1];
-            int result = alarmStore.getBytes(name, &buf, size);
+            alarmStore.getBytes(name, &buf, size);
             memcpy(&newAlarm, buf, size);
             alarmStore.end();
             return true;
@@ -236,7 +235,7 @@ void handleSave(AsyncWebServerRequest *request)
         if (size > 0)
         {
             char *buf[size + 1];
-            int result = preferences.getBytes("alarms", &buf, size);
+            preferences.getBytes("alarms", &buf, size);
             memcpy(&alarmList, buf, size);
         }
     }
@@ -292,7 +291,7 @@ void handleDelete(AsyncWebServerRequest *request)
         if (size > 0)
         {
             char *buf[size + 1];
-            int result = preferences.getBytes("alarms", &buf, size);
+            preferences.getBytes("alarms", &buf, size);
             memcpy(&alarmList, buf, size);
         }
     }

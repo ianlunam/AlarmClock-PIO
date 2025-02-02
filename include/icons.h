@@ -1,4 +1,3 @@
-#include <Arduino.h>
 
 uint16_t wifiX = 295;
 uint16_t wifiY = 0;

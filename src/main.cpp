@@ -1,5 +1,3 @@
-#include <Arduino.h>
-
 #include "Network.h"
 #include "Display.h"
 #include "Clock.h"

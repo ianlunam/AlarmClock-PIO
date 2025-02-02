@@ -1,7 +1,6 @@
 #ifndef Display_h
 #define Display_h
 
-#include <Arduino.h>
 #include <TFT_eSPI.h>
 
 class Display

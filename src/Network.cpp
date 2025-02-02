@@ -1,5 +1,3 @@
-#include <Arduino.h>
-
 #include <WiFi.h>
 #include "Network.h"
 #include "icons.h"
