@@ -7,6 +7,7 @@
 #include <XPT2046_Touchscreen.h>
 #include <SPI.h>
 #include <TFT_eWidget.h>
+#include <sstream>
 
 struct tm timeinfo3;
 Display alarmDisplay;
@@ -25,6 +26,10 @@ char alarmList[][20] = {"", "", "", "", "", ""};
 int lastAlarmCheck = 100;
 
 TaskHandle_t alarmTaskHandle = NULL;
+
+char stop_text[] = "Stop";
+char snooze_text[] = "Snooze";
+
 
 Alarm::Alarm() {}
 
@@ -154,6 +159,7 @@ bool alarmTriggerNow()
             Serial.print(currentTime);
             Serial.print(" Alarm: ");
             Serial.print(alarmTime);
+            Serial.print("\n");
             if (alarmTime == currentTime)
             {
                 if (nextAlarm.once)
@@ -197,6 +203,7 @@ bool snooze()
     time_t nowTimestamp = mktime(&nowTm);
 
     bool stop = false;
+    long countdown = 0;
     while (nowTimestamp < (snoozeStartTimestamp + (SNOOZE_PERIOD * 60)))
     {
         if (ts.tirqTouched() && ts.touched())
@@ -212,10 +219,25 @@ bool snooze()
 
         getLocalTime(&nowTm);
         nowTimestamp = mktime(&nowTm);
+
+        long remaining = (snoozeStartTimestamp + (SNOOZE_PERIOD * 60)) - nowTimestamp;
+        if (countdown != remaining) {
+            char buffer[30];
+            int ret = snprintf(buffer, sizeof(buffer), "%ld", remaining);
+            char * str = buffer;
+
+            snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, str, 2);
+            snoozeButton->drawSmoothButton(false, 3, TFT_BLACK);
+            snoozeButton->flush();
+            countdown = remaining;
+        }
     }
     Serial.println("Leaving snooze loop");
     snoozeSprite->fillSprite(BACKGROUND_COLOUR);
     snoozeSprite->pushSprite(250, 205);
+    snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, snooze_text, 2);
+    snoozeButton->drawSmoothButton(false, 3, TFT_BLACK);
+    snoozeButton->flush();
     if (stop == false)
     {
         screamer.start();
@@ -227,6 +249,11 @@ void scream()
 {
     Serial.println("Entering alarming state");
     screamer.start();
+
+    stopButton->initButtonUL(10, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, stop_text, 2);
+    stopButton->drawSmoothButton(false, 3, TFT_BLACK);
+    snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, snooze_text, 2);
+    snoozeButton->drawSmoothButton(false, 3, TFT_BLACK);
 
     for (;;)
     {
@@ -248,6 +275,11 @@ void scream()
     Serial.println("Exiting alarming state");
     vTaskDelay(500 / portTICK_PERIOD_MS);
     alarmDisplay.set_backlight(BL_MAX);
+
+    stopButton->initButtonUL(10, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, stop_text, 2);
+    stopButton->drawSmoothButton(false, 3, TFT_BLACK);
+    snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, snooze_text, 2);
+    snoozeButton->drawSmoothButton(false, 3, TFT_BLACK);
 }
 
 void alarm_clock(void *pvParameters)
@@ -258,10 +290,12 @@ void alarm_clock(void *pvParameters)
 
     // Black with black surround and black text, for now.
     stopButton = new ButtonWidget(&tft);
-    snoozeButton = new ButtonWidget(&tft);
-    stopButton->initButtonUL(10, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, "Stop", 2);
+    stopButton->initButtonUL(10, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, stop_text, 2);
     stopButton->drawSmoothButton(false, 3, TFT_BLACK);
-    snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, "Snooze", 2);
+
+    // Black with black surround and black text, for now.
+    snoozeButton = new ButtonWidget(&tft);
+    snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, snooze_text, 2);
     snoozeButton->drawSmoothButton(false, 3, TFT_BLACK);
 
     snoozeSprite->createSprite(80, 25);
