@@ -151,8 +151,7 @@ bool alarmTriggerNow()
             t.tm_year = currentTm.tm_year; // Construct tm as per today for alarm time at zero seconds
             t.tm_mon = currentTm.tm_mon;
             t.tm_mday = currentTm.tm_mday;
-            t.tm_hour = nextAlarm.hour;
-            // t.tm_hour = nextAlarm.hour - currentTm.tm_isdst;
+            t.tm_hour = nextAlarm.hour - currentTm.tm_isdst;
             t.tm_min = nextAlarm.minute;
             t.tm_sec = 0;
             time_t alarmTime = mktime(&t); // convert to seconds
