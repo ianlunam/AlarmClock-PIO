@@ -25,7 +25,7 @@ void Display::start()
     Serial.println("Starting display");
     // Start the tft display and set it to black
     tft.init();
-    tft.setRotation(1); // This is the display in landscape
+    tft.setRotation(3); // This is the display in landscape
 
 #if ESP_IDF_VERSION_MAJOR == 5
     ledcAttach(TFT_BL, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
