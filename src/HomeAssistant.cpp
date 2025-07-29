@@ -24,10 +24,10 @@ PubSubClient client(espClient);
 Display mqttDisplay;
 Alarm mqttAlarm;
 
-const char *holiday_topic = "homeassistant/calendar/new_zealand_auk/state";
-const char *humidity_topic = "homeassistant/sensor/t_h_sensor_humidity/state";
-const char *temperature_topic = "homeassistant/sensor/t_h_sensor_temperature/state";
-const char *weather_topic = "homeassistant/weather/forecast_harrisfield/state";
+const String holiday_topic = "homeassistant/calendar/new_zealand_auk/state";
+const String humidity_topic = "homeassistant/sensor/t_h_sensor_humidity/state";
+const String temperature_topic = "homeassistant/sensor/t_h_sensor_temperature/state";
+const String weather_topic = "homeassistant/weather/forecast_harrisfield/state";
 
 TFT_eSprite *holidaySprite;
 TFT_eSprite *humiditySprite;
@@ -54,46 +54,42 @@ void updateSprite(TFT_eSprite *sprite, char value[], uint16_t x, uint16_t y)
 
 void callback(char *topic, byte *payload, unsigned int length)
 {
-    char value[length + 1];
-    strncpy(value, reinterpret_cast<char *>(payload), length);
-    value[length] = '\0';
+    String sTopic(topic);
+    String sPayload(payload, length);
+    Serial.print(sTopic);
+    Serial.print(" - ");
+    Serial.println(sPayload);
 
-    if (strcmp(topic, weather_topic) == 0)
+    if (sTopic == weather_topic)
     {
-        if (isalpha(value[0]))
+        if (isalpha(sPayload[0]))
         {
-            value[0] = toupper(value[0]);
+            sPayload[0] = toupper(sPayload[0]);
         }
-        updateSprite(weatherSprite, value, WEATHER_SPRITE_X, WEATHER_SPRITE_Y);
+        updateSprite(weatherSprite, (char *)sPayload.c_str(), WEATHER_SPRITE_X, WEATHER_SPRITE_Y);
     }
-    else if (strcmp(topic, holiday_topic) == 0)
+    else if (sTopic == holiday_topic)
     {
-        const char on[] = "on";
-        const char off[] = "off";
-        if (memcmp(payload, on, length) == 0)
+        if (sPayload == String("on"))
         {
             mqttAlarm.set_public_holiday(true);
-            char hach[] = "H";
-            updateSprite(holidaySprite, hach, HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
+            updateSprite(holidaySprite, (char *)"H", HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
         }
-        else if (memcmp(payload, off, length) == 0)
+        else if (sPayload == String("off"))
         {
             mqttAlarm.set_public_holiday(false);
-            char nout[] = "";
-            updateSprite(holidaySprite, nout, HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
+            updateSprite(holidaySprite, (char *)"", HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
         }
     }
-    else if (strcmp(topic, temperature_topic) == 0)
+    else if (sTopic == temperature_topic)
     {
-        char temp[length + 2];
-        snprintf(temp, length + 2, "%sC", value);
-        updateSprite(temperatureSprite, temp, TEMPERATURE_SPRITE_X, TEMPERATURE_SPRITE_Y);
+        sPayload.concat("C");
+        updateSprite(temperatureSprite, (char *)sPayload.c_str(), TEMPERATURE_SPRITE_X, TEMPERATURE_SPRITE_Y);
     }
-    else if (strcmp(topic, humidity_topic) == 0)
+    else if (sTopic == humidity_topic)
     {
-        char humid[length + 2];
-        snprintf(humid, length + 2, "%s%%", value);
-        updateSprite(humiditySprite, humid, HUMIDITY_SPRITE_X, HUMIDITY_SPRITE_Y);
+        sPayload.concat("%");
+        updateSprite(humiditySprite, (char *)sPayload.c_str(), HUMIDITY_SPRITE_X, HUMIDITY_SPRITE_Y);
     }
 }
 
@@ -116,10 +112,10 @@ void connect()
             vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
     }
-    client.subscribe(weather_topic);
-    client.subscribe(holiday_topic);
-    client.subscribe(temperature_topic);
-    client.subscribe(humidity_topic);
+    client.subscribe(weather_topic.c_str());
+    client.subscribe(holiday_topic.c_str());
+    client.subscribe(temperature_topic.c_str());
+    client.subscribe(humidity_topic.c_str());
 }
 
 void get_mqtt(void *pvParameters)

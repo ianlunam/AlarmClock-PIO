@@ -118,13 +118,9 @@ bool alarmTriggerNow()
         {
             continue;
         }
-        // Serial.print("Checking alarm ");
-        // Serial.println(alarmList[x]);
         AlarmEntry nextAlarm;
         if (getAlarm(alarmList[x], nextAlarm))
         {
-            // Serial.println(toString(nextAlarm));
-
             // Skip the alarm if ...
             if (!nextAlarm.enabled)
                 continue;
@@ -155,13 +151,6 @@ bool alarmTriggerNow()
             t.tm_min = nextAlarm.minute;
             t.tm_sec = 0;
             time_t alarmTime = mktime(&t); // convert to seconds
-            Serial.print("Now: ");
-            Serial.print(currentTime);
-            Serial.print(" Alarm: ");
-            Serial.print(alarmTime);
-            Serial.print(" Offset: ");
-            Serial.print(currentTm.tm_isdst);
-            Serial.print("\n");
             if (alarmTime == currentTime)
             {
                 if (nextAlarm.once)
@@ -186,8 +175,6 @@ void Alarm::set_public_holiday(bool state)
 
 bool snooze()
 {
-    Serial.println("Entering snooze state");
-
     screamer.stop();
     vTaskDelay(500 / portTICK_PERIOD_MS);
     alarmDisplay.set_backlight(BL_MAX);
@@ -211,10 +198,12 @@ bool snooze()
         if (ts.tirqTouched() && ts.touched())
         {
             TS_Point p = ts.getPoint();
-            if (p.x < 2000)
-            {
-                stop = true;
-                break;
+            if (p.y > 100 && p.y < 1000 && p.x > 200 && p.x < 3800) {
+                if (p.x > 2000)
+                {
+                    stop = true;
+                    break;
+                }
             }
         }
         vTaskDelay(200 / portTICK_PERIOD_MS);
@@ -234,7 +223,6 @@ bool snooze()
             countdown = remaining;
         }
     }
-    Serial.println("Leaving snooze loop");
     snoozeSprite->fillSprite(BACKGROUND_COLOUR);
     snoozeSprite->pushSprite(250, 205);
     snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, snooze_text, 2);
@@ -249,7 +237,6 @@ bool snooze()
 
 void scream()
 {
-    Serial.println("Entering alarming state");
     screamer.start();
 
     stopButton->initButtonUL(10, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, stop_text, 2);
@@ -262,19 +249,20 @@ void scream()
         if (ts.tirqTouched() && ts.touched())
         {
             TS_Point p = ts.getPoint();
-            if (p.x < 2000)
-            {
-                break;
-            }
-            if (snooze())
-            {
-                break;
+            if (p.y > 100 && p.y < 1000 && p.x > 200 && p.x < 3800) {
+                if (p.x > 2000)
+                {
+                    break;
+                }
+                if (snooze())
+                {
+                    break;
+                }
             }
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
     screamer.stop();
-    Serial.println("Exiting alarming state");
     vTaskDelay(500 / portTICK_PERIOD_MS);
     alarmDisplay.set_backlight(BL_MAX);
 
@@ -307,7 +295,6 @@ void alarm_clock(void *pvParameters)
     snoozeSprite->fillSprite(BACKGROUND_COLOUR);
     snoozeSprite->pushSprite(250, 205);
 
-    Serial.println("Alarm started");
     for (;;)
     {
         if (alarmTriggerNow() == true)
