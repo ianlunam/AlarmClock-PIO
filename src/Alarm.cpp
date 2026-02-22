@@ -198,6 +198,7 @@ bool snooze()
         if (ts.tirqTouched() && ts.touched())
         {
             TS_Point p = ts.getPoint();
+            Serial.printf("x: %d y: %d\n", p.x, p.y);
             if (p.y > 100 && p.y < 1000 && p.x > 200 && p.x < 3800) {
                 if (p.x > 2000)
                 {
@@ -249,6 +250,7 @@ void scream()
         if (ts.tirqTouched() && ts.touched())
         {
             TS_Point p = ts.getPoint();
+            Serial.printf("x: %d y: %d\n", p.x, p.y);
             if (p.y > 100 && p.y < 1000 && p.x > 200 && p.x < 3800) {
                 if (p.x > 2000)
                 {

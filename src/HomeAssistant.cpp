@@ -25,8 +25,8 @@ Display mqttDisplay;
 Alarm mqttAlarm;
 
 const String holiday_topic = "homeassistant/calendar/new_zealand_auk/state";
-const String humidity_topic = "homeassistant/sensor/t_h_sensor_humidity/state";
-const String temperature_topic = "homeassistant/sensor/t_h_sensor_temperature/state";
+const String humidity_topic = "homeassistant/weather/forecast_harrisfield/humidity";
+const String temperature_topic = "homeassistant/weather/forecast_harrisfield/temperature";
 const String weather_topic = "homeassistant/weather/forecast_harrisfield/state";
 
 TFT_eSprite *holidaySprite;
