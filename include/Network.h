@@ -1,0 +1,12 @@
+#ifndef Network_h
+#define Network_h
+#include "Display.h"
+
+class Network
+{
+public:
+  Network();
+  void start(Display &display);
+};
+
+#endif
