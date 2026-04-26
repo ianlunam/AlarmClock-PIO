@@ -17,10 +17,8 @@ bool alarmHoliday = false;
 
 SPIClass mySpi = SPIClass(VSPI);
 XPT2046_Touchscreen ts(XPT2046_CS, XPT2046_IRQ);
-TFT_eSprite *snoozeSprite;
 
 ButtonWidget *stopButton;
-ButtonWidget *snoozeButton;
 
 char alarmList[][20] = {"", "", "", "", "", ""};
 int lastAlarmCheck = 100;
@@ -28,7 +26,6 @@ int lastAlarmCheck = 100;
 TaskHandle_t alarmTaskHandle = NULL;
 
 char stop_text[] = "Stop";
-char snooze_text[] = "Snooze";
 
 
 Alarm::Alarm() {}
@@ -173,76 +170,12 @@ void Alarm::set_public_holiday(bool state)
     alarmHoliday = state;
 }
 
-bool snooze()
-{
-    screamer.stop();
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    alarmDisplay.set_backlight(BL_MAX);
-
-    snoozeSprite->fillSprite(BACKGROUND_COLOUR);
-    snoozeSprite->setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
-    snoozeSprite->drawString("Zzzz", 0, 0);
-    snoozeSprite->pushSprite(250, 205);
-
-    struct tm nowTm;
-    getLocalTime(&nowTm);
-    time_t snoozeStartTimestamp = mktime(&nowTm);
-
-    getLocalTime(&nowTm);
-    time_t nowTimestamp = mktime(&nowTm);
-
-    bool stop = false;
-    long countdown = 0;
-    while (nowTimestamp < (snoozeStartTimestamp + (SNOOZE_PERIOD * 60)))
-    {
-        if (ts.tirqTouched() && ts.touched())
-        {
-            TS_Point p = ts.getPoint();
-            if (p.y > 300 && p.y < 1000 && p.x > 200 && p.x < 2700) {
-                if (p.x > 2000)
-                {
-                    stop = true;
-                    break;
-                }
-            }
-        }
-        vTaskDelay(200 / portTICK_PERIOD_MS);
-
-        getLocalTime(&nowTm);
-        nowTimestamp = mktime(&nowTm);
-
-        long remaining = (snoozeStartTimestamp + (SNOOZE_PERIOD * 60)) - nowTimestamp;
-        if (countdown != remaining) {
-            char buffer[30];
-            int ret = snprintf(buffer, sizeof(buffer), "%ld", remaining);
-            char * str = buffer;
-
-            snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, str, 2);
-            snoozeButton->drawSmoothButton(false, 3, TFT_BLACK);
-            snoozeButton->flush();
-            countdown = remaining;
-        }
-    }
-    snoozeSprite->fillSprite(BACKGROUND_COLOUR);
-    snoozeSprite->pushSprite(250, 205);
-    snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, snooze_text, 2);
-    snoozeButton->drawSmoothButton(false, 3, TFT_BLACK);
-    snoozeButton->flush();
-    if (stop == false)
-    {
-        screamer.start();
-    }
-    return stop;
-}
-
 void scream()
 {
     screamer.start();
 
     stopButton->initButtonUL(10, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, stop_text, 2);
     stopButton->drawSmoothButton(false, 3, TFT_BLACK);
-    snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, snooze_text, 2);
-    snoozeButton->drawSmoothButton(false, 3, TFT_BLACK);
 
     for (;;)
     {
@@ -250,14 +183,7 @@ void scream()
         {
             TS_Point p = ts.getPoint();
             if (p.y > 300 && p.y < 1000 && p.x > 200 && p.x < 2700) {
-                if (p.x > 2000)
-                {
-                    break;
-                }
-                if (snooze())
-                {
-                    break;
-                }
+                break;
             }
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
@@ -268,32 +194,17 @@ void scream()
 
     stopButton->initButtonUL(10, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, stop_text, 2);
     stopButton->drawSmoothButton(false, 3, TFT_BLACK);
-    snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, snooze_text, 2);
-    snoozeButton->drawSmoothButton(false, 3, TFT_BLACK);
 }
 
 void alarm_clock(void *pvParameters)
 {
 
     TFT_eSPI tft = alarmDisplay.get_tft();
-    snoozeSprite = new TFT_eSprite(&tft);
 
     // Black with black surround and black text, for now.
     stopButton = new ButtonWidget(&tft);
     stopButton->initButtonUL(10, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, stop_text, 2);
     stopButton->drawSmoothButton(false, 3, TFT_BLACK);
-
-    // Black with black surround and black text, for now.
-    snoozeButton = new ButtonWidget(&tft);
-    snoozeButton->initButtonUL(170, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, snooze_text, 2);
-    snoozeButton->drawSmoothButton(false, 3, TFT_BLACK);
-
-    snoozeSprite->createSprite(80, 25);
-    snoozeSprite->setColorDepth(8);
-    snoozeSprite->setFreeFont(&FreeSansBold12pt7b);
-    snoozeSprite->setTextSize(1);
-    snoozeSprite->fillSprite(BACKGROUND_COLOUR);
-    snoozeSprite->pushSprite(250, 205);
 
     for (;;)
     {

@@ -7,7 +7,6 @@
 - LDR used to dim screen
 - WiFi (dis)connected icon
 - Basic alarm tone
-- Currently left half of touchscreen for off, right for snooze
 - Speaker connected to SPEAK with ~400 ohm resister to reduce volume
 
 ## Settings
@@ -17,7 +16,6 @@
 ## Outstanding issues
 
 - I'm still a cpp beginner
-- Display stop / snooze buttons, and maybe snooze countdown
 - Backlight goes off when tone ends (goes on and off during alarm), currently forcing back on after alarm
 
 ## Move from `tone` to max98357a and I2C
