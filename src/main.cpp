@@ -18,6 +18,9 @@ void setup()
 {
     Serial.begin(115200);
     Serial.println("Starting");
+    delay(1000);
+    Serial.println("Starting");
+    delay(1000);
 
     // Turn off LED
     pinMode(LED_RED, OUTPUT);

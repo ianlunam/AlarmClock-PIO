@@ -3,8 +3,9 @@
     "files.trimFinalNewlines": true,
     "files.insertFinalNewline": true,
     "keyboard.dispatch": "keyCode",
-    "idf.port": "/dev/ttyUSB0",
+    "idf.port": "/dev/ttyUSB1",
     "files.associations": {
         "*.tcc": "cpp"
     },
+    "idf.currentSetup": "/home/ian/.espressif/v6.0.1/esp-idf",
 }

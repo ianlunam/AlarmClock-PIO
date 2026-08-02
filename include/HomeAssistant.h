@@ -7,6 +7,7 @@ class HomeAssistant
 public:
   HomeAssistant();
   void start(const Display &indisp, const Alarm &inalarm);
+  bool mqtt_status();
 };
 
 #endif

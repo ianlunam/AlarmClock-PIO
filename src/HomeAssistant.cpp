@@ -24,10 +24,10 @@ PubSubClient client(espClient);
 Display mqttDisplay;
 Alarm mqttAlarm;
 
-const String holiday_topic = "homeassistant/calendar/new_zealand_auk/state";
-const String humidity_topic = "homeassistant/weather/forecast_harrisfield/humidity";
-const String temperature_topic = "homeassistant/weather/forecast_harrisfield/temperature";
-const String weather_topic = "homeassistant/weather/forecast_harrisfield/state";
+const String holiday_topic = "homeassistant/calendar/workday_sensor_nz_bop_calendar";
+const String humidity_topic = "homeassistant/weather/forecast_home/humidity";
+const String temperature_topic = "homeassistant/weather/forecast_home/temperature";
+const String weather_topic = "homeassistant/weather/forecast_home/state";
 
 TFT_eSprite *holidaySprite;
 TFT_eSprite *humiditySprite;
@@ -91,6 +91,10 @@ void callback(char *topic, byte *payload, unsigned int length)
         sPayload.concat("%");
         updateSprite(humiditySprite, (char *)sPayload.c_str(), HUMIDITY_SPRITE_X, HUMIDITY_SPRITE_Y);
     }
+    else
+    {
+        Serial.println("Unknown topic");
+    }
 }
 
 void connect()
@@ -101,7 +105,7 @@ void connect()
     {
         String client_id = "esp32-client-";
         client_id += String(WiFi.macAddress());
-        if (client.connect(client_id.c_str()))
+        if (client.connect(client_id.c_str(), MQTT_USER, MQTT_PWD))
         {
             Serial.println("MQTT started");
         }
@@ -149,4 +153,9 @@ void HomeAssistant::start(const Display &display, const Alarm &alarm)
     mqttDisplay = display;
     mqttAlarm = alarm;
     xTaskCreate(get_mqtt, "Display MQTT Data", 4096, NULL, 10, NULL);
+}
+
+bool HomeAssistant::mqtt_status()
+{
+    return client.state();
 }
