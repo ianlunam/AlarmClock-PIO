@@ -213,7 +213,7 @@ void scream()
 void alarm_clock(void *pvParameters)
 {
 
-    TFT_eSPI tft = alarmDisplay.get_tft();
+    TFT_eSPI &tft = alarmDisplay.get_tft();
 
     // Black with black surround and black text, for now.
     stopButton = new ButtonWidget(&tft);

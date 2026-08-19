@@ -124,7 +124,7 @@ void connect()
 
 void get_mqtt(void *pvParameters)
 {
-    TFT_eSPI tft = mqttDisplay.get_tft();
+    TFT_eSPI &tft = mqttDisplay.get_tft();
     holidaySprite = new TFT_eSprite(&tft);
     temperatureSprite = new TFT_eSprite(&tft);
     humiditySprite = new TFT_eSprite(&tft);

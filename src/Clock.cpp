@@ -11,7 +11,7 @@ int lastDoW = -1;
 void display_time(void *pvParameters)
 {
     Serial.println("Clock started");
-    TFT_eSPI tft = clockDisplay.get_tft();
+    TFT_eSPI &tft = clockDisplay.get_tft();
     TFT_eSprite spr = TFT_eSprite(&tft);
 
     spr.setColorDepth(8);
@@ -53,7 +53,7 @@ void display_time(void *pvParameters)
 void display_dow(void *pvParameters)
 {
     Serial.println("Clock started");
-    TFT_eSPI tft = clockDisplay.get_tft();
+    TFT_eSPI &tft = clockDisplay.get_tft();
     TFT_eSprite dowSprite = TFT_eSprite(&tft);
     TFT_eSprite dateSprite = TFT_eSprite(&tft);
 
