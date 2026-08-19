@@ -18,6 +18,16 @@ bool alarmHoliday = false;
 SPIClass mySpi = SPIClass(VSPI);
 XPT2046_Touchscreen ts(XPT2046_CS, XPT2046_IRQ);
 
+// Raw XPT2046 touch ADC range for this panel, mapped below to the screen's
+// pixel dimensions so touches can be hit-tested against a widget's actual
+// on-screen position and size, instead of a hand-picked coordinate box. If
+// touches don't land where expected, touch each screen corner, print
+// ts.getPoint().x/.y over Serial, and adjust these four numbers to match.
+const int16_t TOUCH_RAW_X_MIN = 200;
+const int16_t TOUCH_RAW_X_MAX = 2700;
+const int16_t TOUCH_RAW_Y_MIN = 300;
+const int16_t TOUCH_RAW_Y_MAX = 1000;
+
 ButtonWidget *stopButton;
 
 char alarmList[][20] = {"", "", "", "", "", ""};
@@ -186,6 +196,18 @@ void Alarm::set_public_holiday(bool state)
     alarmHoliday = state;
 }
 
+bool touchOnButton(ButtonWidget *button)
+{
+    if (!(ts.tirqTouched() && ts.touched()))
+    {
+        return false;
+    }
+    TS_Point p = ts.getPoint();
+    int16_t pixelX = map(p.x, TOUCH_RAW_X_MIN, TOUCH_RAW_X_MAX, 0, 320);
+    int16_t pixelY = map(p.y, TOUCH_RAW_Y_MIN, TOUCH_RAW_Y_MAX, 0, 240);
+    return button->contains(pixelX, pixelY);
+}
+
 void scream()
 {
     alarmActive = true;
@@ -196,12 +218,9 @@ void scream()
 
     for (;;)
     {
-        if (ts.tirqTouched() && ts.touched())
+        if (touchOnButton(stopButton))
         {
-            TS_Point p = ts.getPoint();
-            if (p.y > 300 && p.y < 1000 && p.x > 200 && p.x < 2700) {
-                break;
-            }
+            break;
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
