@@ -1,6 +1,7 @@
 #include "Display.h"
 #include <TFT_eSPI.h>
 #include "HomeAssistant.h"
+#include "WeatherIcons.h"
 #include <iostream>
 #include <string>
 using namespace std;
@@ -62,11 +63,7 @@ void callback(char *topic, byte *payload, unsigned int length)
 
     if (sTopic == weather_topic)
     {
-        if (isalpha(sPayload[0]))
-        {
-            sPayload[0] = toupper(sPayload[0]);
-        }
-        updateSprite(weatherSprite, (char *)sPayload.c_str(), WEATHER_SPRITE_X, WEATHER_SPRITE_Y);
+        updateWeatherIcon(weatherSprite, sPayload, WEATHER_SPRITE_X, WEATHER_SPRITE_Y);
     }
     else if (sTopic == holiday_topic)
     {
