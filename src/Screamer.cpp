@@ -1,48 +1,67 @@
 #include "Screamer.h"
 #include <Arduino.h>
 
-TaskHandle_t beeperTaskHandle = NULL;
+namespace
+{
+    const note_t MELODY[] = {NOTE_A, NOTE_C, NOTE_A, NOTE_C, NOTE_A, NOTE_C, NOTE_A, NOTE_C};
+    const int MELODY_LENGTH = sizeof(MELODY) / sizeof(MELODY[0]);
+    const int NOTE_MS = 500;
+    const int PAUSE_MS = 1000;
+    // How often the beeper task checks for a stop request while holding a
+    // note or pausing - this bounds how long stop() takes to notice.
+    const int STOP_CHECK_INTERVAL_MS = 50;
+}
+
+// Set to request the beeper task stop; cleared again once it has actually
+// detached the pin and exited, so stop() knows when it's safe to return.
+volatile bool beeperShouldStop = false;
+volatile bool beeperRunning = false;
 
 void sound_beeper(void *pvParameters)
 {
-
-  ledcAttachPin(SPEAKER_PIN, 0);
-  for (;;)
-  {
+    beeperRunning = true;
     ledcAttachPin(SPEAKER_PIN, 0);
-    ledcWriteNote(SPEAKER_CHANNEL, NOTE_A, 4);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    ledcWriteNote(SPEAKER_CHANNEL, NOTE_C, 4);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    ledcWriteNote(SPEAKER_CHANNEL, NOTE_A, 4);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    ledcWriteNote(SPEAKER_CHANNEL, NOTE_C, 4);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    ledcWriteNote(SPEAKER_CHANNEL, NOTE_A, 4);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    ledcWriteNote(SPEAKER_CHANNEL, NOTE_C, 4);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    ledcWriteNote(SPEAKER_CHANNEL, NOTE_A, 4);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    ledcWriteNote(SPEAKER_CHANNEL, NOTE_C, 4);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+
+    for (;;)
+    {
+        for (int i = 0; i < MELODY_LENGTH && !beeperShouldStop; i++)
+        {
+            ledcWriteNote(SPEAKER_CHANNEL, MELODY[i], 4);
+            for (int waited = 0; waited < NOTE_MS && !beeperShouldStop; waited += STOP_CHECK_INTERVAL_MS)
+            {
+                vTaskDelay(STOP_CHECK_INTERVAL_MS / portTICK_PERIOD_MS);
+            }
+        }
+        if (beeperShouldStop)
+        {
+            break;
+        }
+        for (int waited = 0; waited < PAUSE_MS && !beeperShouldStop; waited += STOP_CHECK_INTERVAL_MS)
+        {
+            vTaskDelay(STOP_CHECK_INTERVAL_MS / portTICK_PERIOD_MS);
+        }
+    }
+
     ledcDetachPin(SPEAKER_PIN);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-  }
+    beeperRunning = false;
+    vTaskDelete(NULL);
 }
 
 Screamer::Screamer() {}
 
 void Screamer::start()
 {
-  xTaskCreate(sound_beeper, "Alarm!", 4096, NULL, 20, &beeperTaskHandle);
+    beeperShouldStop = false;
+    xTaskCreate(sound_beeper, "Alarm!", 4096, NULL, 20, NULL);
 }
 
 void Screamer::stop()
 {
-  if (eTaskGetState(beeperTaskHandle) != eDeleted)
-  {
-    vTaskDelete(beeperTaskHandle);
-  }
-  ledcDetachPin(SPEAKER_PIN);
+    beeperShouldStop = true;
+    // Wait for the task to notice, detach the pin, and delete itself,
+    // instead of killing it wherever it happens to be mid-note.
+    while (beeperRunning)
+    {
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
 }
