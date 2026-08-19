@@ -36,6 +36,13 @@ public:
   ~AlarmStoreLock() { xSemaphoreGiveRecursive(alarmStoreMutex); }
 };
 
+// True while the alarm is ringing (from the moment the stop button is drawn
+// until it's cleared again). Every background task that redraws part of the
+// idle screen (clock, weather, temperature, humidity, day/date) must check
+// this and skip its redraw while it's true, since the alarm screen is
+// allowed to use that same screen space. Set only from Alarm.cpp.
+extern volatile bool alarmActive;
+
 class Alarm
 {
 public:

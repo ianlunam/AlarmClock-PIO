@@ -1,5 +1,6 @@
 #include "Clock.h"
 #include "Display.h"
+#include "Alarm.h"
 #include <time.h>
 
 struct tm clockTimeInfo;
@@ -29,14 +30,25 @@ void display_time(void *pvParameters)
     spr.setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
     spr.pushSprite(x, 15);
 
+    bool forceRedraw = false;
     for (;;)
     {
+        if (alarmActive)
+        {
+            // The alarm screen owns the display right now - don't draw over
+            // it. Redraw unconditionally once it's done.
+            forceRedraw = true;
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+            continue;
+        }
+
         getLocalTime(&clockTimeInfo);
         char ptr[20];
         int rc = strftime(ptr, 20, "%H:%M", &clockTimeInfo);
 
-        if (strcmp(lastValue, ptr) != 0)
+        if (strcmp(lastValue, ptr) != 0 || forceRedraw)
         {
+            forceRedraw = false;
             strncpy(lastValue, ptr, 20);
             spr.fillSprite(BACKGROUND_COLOUR);
             uint32_t len = spr.drawString(ptr, 0, 0);
@@ -77,12 +89,21 @@ void display_dow(void *pvParameters)
     dateSprite.setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
     dateSprite.pushSprite(200, 205);
 
+    bool forceRedraw = false;
     for (;;)
     {
+        if (alarmActive)
+        {
+            forceRedraw = true;
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+            continue;
+        }
+
         getLocalTime(&clockTimeInfo);
 
-        if (lastDoW != clockTimeInfo.tm_wday)
+        if (lastDoW != clockTimeInfo.tm_wday || forceRedraw)
         {
+            forceRedraw = false;
             lastDoW = clockTimeInfo.tm_wday;
 
             char dowPtr[20];

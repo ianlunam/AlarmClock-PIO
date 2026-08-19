@@ -35,6 +35,14 @@ TFT_eSprite *humiditySprite;
 TFT_eSprite *temperatureSprite;
 TFT_eSprite *weatherSprite;
 
+// The last value received for each topic, kept so the display can be fully
+// redrawn from scratch once the alarm screen releases the display, without
+// waiting for the next MQTT update to happen to arrive.
+String lastWeatherCondition = "";
+bool lastHolidayActive = false;
+String lastTemperature = "";
+String lastHumidity = "";
+
 
 void initSprite(TFT_eSprite *sprite, uint16_t width, uint16_t height,  uint16_t x, uint16_t y) {
     sprite->createSprite(width, height);
@@ -63,30 +71,50 @@ void callback(char *topic, byte *payload, unsigned int length)
 
     if (sTopic == weather_topic)
     {
-        updateWeatherIcon(weatherSprite, sPayload, WEATHER_SPRITE_X, WEATHER_SPRITE_Y);
+        lastWeatherCondition = sPayload;
+        if (!alarmActive)
+        {
+            updateWeatherIcon(weatherSprite, sPayload, WEATHER_SPRITE_X, WEATHER_SPRITE_Y);
+        }
     }
     else if (sTopic == holiday_topic)
     {
         if (sPayload == String("on"))
         {
             mqttAlarm.set_public_holiday(true);
-            updateSprite(holidaySprite, (char *)"H", HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
+            lastHolidayActive = true;
+            if (!alarmActive)
+            {
+                updateSprite(holidaySprite, (char *)"H", HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
+            }
         }
         else if (sPayload == String("off"))
         {
             mqttAlarm.set_public_holiday(false);
-            updateSprite(holidaySprite, (char *)"", HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
+            lastHolidayActive = false;
+            if (!alarmActive)
+            {
+                updateSprite(holidaySprite, (char *)"", HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
+            }
         }
     }
     else if (sTopic == temperature_topic)
     {
         sPayload.concat("C");
-        updateSprite(temperatureSprite, (char *)sPayload.c_str(), TEMPERATURE_SPRITE_X, TEMPERATURE_SPRITE_Y);
+        lastTemperature = sPayload;
+        if (!alarmActive)
+        {
+            updateSprite(temperatureSprite, (char *)sPayload.c_str(), TEMPERATURE_SPRITE_X, TEMPERATURE_SPRITE_Y);
+        }
     }
     else if (sTopic == humidity_topic)
     {
         sPayload.concat("%");
-        updateSprite(humiditySprite, (char *)sPayload.c_str(), HUMIDITY_SPRITE_X, HUMIDITY_SPRITE_Y);
+        lastHumidity = sPayload;
+        if (!alarmActive)
+        {
+            updateSprite(humiditySprite, (char *)sPayload.c_str(), HUMIDITY_SPRITE_X, HUMIDITY_SPRITE_Y);
+        }
     }
     else
     {
@@ -132,8 +160,34 @@ void get_mqtt(void *pvParameters)
     initSprite(temperatureSprite, 80, 25, TEMPERATURE_SPRITE_X, TEMPERATURE_SPRITE_Y);
     initSprite(weatherSprite, 160, 25, WEATHER_SPRITE_X, WEATHER_SPRITE_Y);
 
+    bool wasAlarmActive = false;
     for (;;)
     {
+        if (alarmActive)
+        {
+            wasAlarmActive = true;
+        }
+        else if (wasAlarmActive)
+        {
+            // The alarm just released the display - redraw everything from
+            // the last known values instead of waiting for the next MQTT
+            // update, which might be minutes away.
+            wasAlarmActive = false;
+            if (lastWeatherCondition.length() > 0)
+            {
+                updateWeatherIcon(weatherSprite, lastWeatherCondition, WEATHER_SPRITE_X, WEATHER_SPRITE_Y);
+            }
+            updateSprite(holidaySprite, lastHolidayActive ? (char *)"H" : (char *)"", HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
+            if (lastTemperature.length() > 0)
+            {
+                updateSprite(temperatureSprite, (char *)lastTemperature.c_str(), TEMPERATURE_SPRITE_X, TEMPERATURE_SPRITE_Y);
+            }
+            if (lastHumidity.length() > 0)
+            {
+                updateSprite(humiditySprite, (char *)lastHumidity.c_str(), HUMIDITY_SPRITE_X, HUMIDITY_SPRITE_Y);
+            }
+        }
+
         if (!client.connected())
         {
             connect();

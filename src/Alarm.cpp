@@ -25,6 +25,8 @@ int lastAlarmCheck = 100;
 
 SemaphoreHandle_t alarmStoreMutex = xSemaphoreCreateRecursiveMutex();
 
+volatile bool alarmActive = false;
+
 TaskHandle_t alarmTaskHandle = NULL;
 
 char stop_text[] = "Stop";
@@ -186,6 +188,7 @@ void Alarm::set_public_holiday(bool state)
 
 void scream()
 {
+    alarmActive = true;
     screamer.start();
 
     stopButton->initButtonUL(10, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, stop_text, 2);
@@ -208,6 +211,10 @@ void scream()
 
     stopButton->initButtonUL(10, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, stop_text, 2);
     stopButton->drawSmoothButton(false, 3, TFT_BLACK);
+
+    // Only let the idle-screen tasks resume drawing over this area once the
+    // button is actually gone.
+    alarmActive = false;
 }
 
 void alarm_clock(void *pvParameters)
