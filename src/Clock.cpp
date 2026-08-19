@@ -76,18 +76,22 @@ void display_dow(void *pvParameters)
     dateSprite.setFreeFont(&FreeSansBold12pt7b);
     dateSprite.setTextSize(1);
 
-    uint32_t width = 80;
-    uint32_t height = 25;
+    uint32_t width = 110;
+    uint32_t height = 30;
+    uint32_t dowX = 100;
+    uint32_t dowY = 98;
+    uint32_t dateX = 100;
+    uint32_t dateY = 132;
 
     dowSprite.createSprite(width, height);
     dowSprite.fillSprite(BACKGROUND_COLOUR);
     dowSprite.setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
-    dowSprite.pushSprite(200, 175);
+    dowSprite.pushSprite(dowX, dowY);
 
     dateSprite.createSprite(width, height);
     dateSprite.fillSprite(BACKGROUND_COLOUR);
     dateSprite.setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
-    dateSprite.pushSprite(200, 205);
+    dateSprite.pushSprite(dateX, dateY);
 
     bool forceRedraw = false;
     for (;;)
@@ -113,7 +117,7 @@ void display_dow(void *pvParameters)
             uint32_t start = (width / 2) - (len / 2);
             dowSprite.fillSprite(BACKGROUND_COLOUR);
             dowSprite.drawString(dowPtr, start, 0);
-            dowSprite.pushSprite(200, 175);
+            dowSprite.pushSprite(dowX, dowY);
 
             char datePtr[20];
             strftime(datePtr, 20, "%d %b", &clockTimeInfo);
@@ -122,7 +126,7 @@ void display_dow(void *pvParameters)
             uint32_t dateStart = (width / 2) - (dateLen / 2);
             dateSprite.fillSprite(BACKGROUND_COLOUR);
             dateSprite.drawString(datePtr, dateStart, 0);
-            dateSprite.pushSprite(200, 205);
+            dateSprite.pushSprite(dateX, dateY);
         }
 
         vTaskDelay(100 / portTICK_PERIOD_MS);

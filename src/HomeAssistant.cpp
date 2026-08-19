@@ -11,12 +11,12 @@ using namespace std;
 
 #define HOLIDAY_SPRITE_X 275
 #define HOLIDAY_SPRITE_Y 5
-#define HUMIDITY_SPRITE_X 90
-#define HUMIDITY_SPRITE_Y 205
+#define HUMIDITY_SPRITE_X 170
+#define HUMIDITY_SPRITE_Y 190
 #define TEMPERATURE_SPRITE_X 10
-#define TEMPERATURE_SPRITE_Y 205
-#define WEATHER_SPRITE_X 10
-#define WEATHER_SPRITE_Y 175
+#define TEMPERATURE_SPRITE_Y 190
+#define WEATHER_SPRITE_X 20
+#define WEATHER_SPRITE_Y 92
 
 // Wifi
 WiFiClient espClient;
@@ -156,9 +156,9 @@ void get_mqtt(void *pvParameters)
     weatherSprite = new TFT_eSprite(&tft);
 
     initSprite(holidaySprite, 20, 20, HOLIDAY_SPRITE_X, HOLIDAY_SPRITE_Y);
-    initSprite(humiditySprite, 80, 25, HUMIDITY_SPRITE_X, HUMIDITY_SPRITE_Y);
-    initSprite(temperatureSprite, 80, 25, TEMPERATURE_SPRITE_X, TEMPERATURE_SPRITE_Y);
-    initSprite(weatherSprite, 160, 25, WEATHER_SPRITE_X, WEATHER_SPRITE_Y);
+    initSprite(humiditySprite, 150, 35, HUMIDITY_SPRITE_X, HUMIDITY_SPRITE_Y);
+    initSprite(temperatureSprite, 150, 35, TEMPERATURE_SPRITE_X, TEMPERATURE_SPRITE_Y);
+    initSprite(weatherSprite, 70, 70, WEATHER_SPRITE_X, WEATHER_SPRITE_Y);
 
     bool wasAlarmActive = false;
     for (;;)
