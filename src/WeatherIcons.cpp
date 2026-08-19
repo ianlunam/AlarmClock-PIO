@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "WeatherIcons.h"
+#include "WeatherIconShape.h"
 
 // All icons are drawn on a fixed 44x44 logical grid (icon-local coordinates,
 // origin top-left) which is then centred inside whatever sprite is passed
@@ -119,8 +120,7 @@ void updateWeatherIcon(TFT_eSprite *sprite, const String &conditionIn, uint16_t 
 {
     sprite->fillSprite(BACKGROUND_COLOUR);
 
-    String condition = conditionIn;
-    condition.toLowerCase();
+    WeatherIconShape shape = mapConditionToShape(conditionIn.c_str());
 
     int ox = ((int)sprite->width() - ICON_SIZE) / 2;
     int oy = ((int)sprite->height() - ICON_SIZE) / 2;
@@ -129,70 +129,59 @@ void updateWeatherIcon(TFT_eSprite *sprite, const String &conditionIn, uint16_t 
     if (oy < 0)
         oy = 0;
 
-    if (condition == "sunny")
+    switch (shape)
     {
+    case SHAPE_SUN:
         drawSun(sprite, ox, oy, 22, 22, 12);
-    }
-    else if (condition == "clear-night")
-    {
+        break;
+    case SHAPE_CLEAR_NIGHT:
         drawMoon(sprite, ox, oy);
-    }
-    else if (condition == "partlycloudy")
-    {
+        break;
+    case SHAPE_PARTLY_CLOUDY:
         drawSun(sprite, ox, oy, 14, 14, 8);
         drawCloud(sprite, ox, oy, 28, CLOUD_COLOUR);
-    }
-    else if (condition == "cloudy")
-    {
+        break;
+    case SHAPE_CLOUDY:
         drawCloud(sprite, ox, oy, 22, CLOUD_COLOUR);
-    }
-    else if (condition == "fog")
-    {
+        break;
+    case SHAPE_FOG:
         drawFogLines(sprite, ox, oy);
-    }
-    else if (condition == "windy" || condition == "windy-variant")
-    {
+        break;
+    case SHAPE_WIND:
         drawWindLines(sprite, ox, oy);
-    }
-    else if (condition == "rainy")
-    {
+        break;
+    case SHAPE_RAIN:
         drawCloud(sprite, ox, oy, 16, CLOUD_COLOUR);
         drawRainDrops(sprite, ox, oy, 32, 3);
-    }
-    else if (condition == "pouring")
-    {
+        break;
+    case SHAPE_POURING:
         drawCloud(sprite, ox, oy, 16, DARK_CLOUD_COLOUR);
         drawRainDrops(sprite, ox, oy, 32, 4);
-    }
-    else if (condition == "lightning")
-    {
+        break;
+    case SHAPE_LIGHTNING:
         drawCloud(sprite, ox, oy, 12, DARK_CLOUD_COLOUR);
         drawBolt(sprite, ox, oy);
-    }
-    else if (condition == "lightning-rainy")
-    {
+        break;
+    case SHAPE_LIGHTNING_RAIN:
         drawCloud(sprite, ox, oy, 12, DARK_CLOUD_COLOUR);
         drawBolt(sprite, ox, oy);
         drawRainDrops(sprite, ox, oy, 36, 2);
-    }
-    else if (condition == "snowy")
-    {
+        break;
+    case SHAPE_SNOW:
         drawCloud(sprite, ox, oy, 16, CLOUD_COLOUR);
         drawSnowFlakes(sprite, ox, oy, 34, 3);
-    }
-    else if (condition == "snowy-rainy")
-    {
+        break;
+    case SHAPE_SNOW_RAIN:
         drawCloud(sprite, ox, oy, 16, CLOUD_COLOUR);
         drawRainDrops(sprite, ox, oy, 32, 2);
         drawSnowFlakes(sprite, ox, oy, 34, 2);
-    }
-    else if (condition == "hail")
-    {
+        break;
+    case SHAPE_HAIL:
         drawCloud(sprite, ox, oy, 16, CLOUD_COLOUR);
         drawHailStones(sprite, ox, oy, 34, 3);
-    }
-    else
-    {
+        break;
+    case SHAPE_UNKNOWN:
+    default:
         // Unknown/unmapped condition (e.g. "exceptional") - show the text
         // instead of nothing, so it's never a blank space.
         drawFallbackText(sprite, conditionIn);
