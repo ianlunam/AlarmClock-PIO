@@ -35,7 +35,7 @@ void Network::start(Display &display)
 {
     starting = true;
 
-    TFT_eSPI tft = display.get_tft();
+    TFT_eSPI &tft = display.get_tft();
     wifiSprite = new TFT_eSprite(&tft);
 
     wifiSprite->createSprite(25, 25);
