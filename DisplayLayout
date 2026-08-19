@@ -2,23 +2,29 @@
 CYD ESP32-2432S028
 
 ----------------------------------------------------------------
-|                     10px high                                |
+|                                     20x20 Holiday   25x25 WiFi|   y 0-25
 ----------------------------------------------------------------
 |  44  |             232px x 75px                       |  44  |
-|      |                Clock                           |      |
-|      |                                                |      |
-|      |                                                |      |
-|      |                                                |      |
+|      |                Clock                           |      |   y 15-90
 |      |                                                |      |
 ----------------------------------------------------------------
-|                                                              |
-|                                                              |
-|                                                              |
-|                320 x  95                                     |
-|-------------------------------|------------------------------|
-|         160x25   Forecast     |                              |
-|--------------------------------          160x50              |
-| 80x25   Temp  |  80x25  Humid |                              |
+|  20  |--------------------|---------------------------|  180 |
+|      |     70x70          |   110x30  Day of Week      |      |
+|      |   Weather Icon     |---------------------------|      |   y 92-162
+|      |    (x=20,y=92)     |   110x30  Date             |      |
+|      |--------------------|---------------------------|      |
 ----------------------------------------------------------------
-|                     10px high                                |
+| 10 | 150x35   Temperature   |  170  | 150x35   Humidity |     |   y 190-225
 ----------------------------------------------------------------
+
+Notes:
+- Weather icon grew from 22x22 to 44x44 (drawn inside a 70x70 sprite)
+  to fill the previously-empty middle band.
+- Day-of-week and date moved up next to the weather icon instead of
+  sharing the bottom row with temperature/humidity.
+- Temperature and humidity widened to 150x35 each, now that day/date
+  moved off that row.
+- The alarm stop button (10, 100, 150x60) overlaps the weather icon's
+  area - this is intentional and safe: every background redraw task
+  checks a shared alarmActive flag and skips drawing while the alarm
+  is ringing (see Alarm.h/AlarmStoreLock's neighbour, alarmActive).
