@@ -1,4 +1,5 @@
 #include "Ldr.h"
+#include "LdrHysteresis.h"
 #include <Display.h>
 
 Ldr::Ldr() {}
@@ -16,32 +17,15 @@ void get_ldr(void *pvParameters)
     {
         int sensorValue = analogRead(LDR_PIN);
 
-        // Hysteresis: "dark" and "light" use different thresholds with a dead
-        // zone between them, and a reading must persist for several polls
-        // before it's acted on. Without this, a value sitting right on the
-        // boundary flickers the backlight between min and max every 100ms.
-        if (sensorValue <= LDR_DARK_THRESHOLD)
-        {
-            darkCount++;
-            lightCount = 0;
-        }
-        else if (sensorValue >= LDR_LIGHT_THRESHOLD)
-        {
-            lightCount++;
-            darkCount = 0;
-        }
-        else
-        {
-            darkCount = 0;
-            lightCount = 0;
-        }
+        LdrDecision decision = ldrUpdate(sensorValue, backlightDown, darkCount, lightCount,
+                                          LDR_DARK_THRESHOLD, LDR_LIGHT_THRESHOLD, LDR_DEBOUNCE_COUNT);
 
-        if (darkCount >= LDR_DEBOUNCE_COUNT && backlightDown)
+        if (decision == LDR_GO_BRIGHT)
         {
             backlightDown = false;
             ldrDisplay.set_backlight(BL_MAX);
         }
-        else if (lightCount >= LDR_DEBOUNCE_COUNT && !backlightDown)
+        else if (decision == LDR_GO_DIM)
         {
             backlightDown = true;
             ldrDisplay.set_backlight(BL_MIN);
