@@ -362,6 +362,15 @@ void handleRoot(AsyncWebServerRequest *request)
     request->send(response);
 };
 
+void handle_ota(void *pvParameters)
+{
+    for (;;)
+    {
+        ArduinoOTA.handle();
+        vTaskDelay(20 / portTICK_PERIOD_MS);
+    }
+}
+
 WebServer::WebServer() {}
 
 void WebServer::start()
@@ -403,6 +412,7 @@ void WebServer::start()
 
     ArduinoOTA.setHostname("newalarmclock");
     ArduinoOTA.begin();
+    xTaskCreate(handle_ota, "ArduinoOTA", 4096, NULL, 10, NULL);
 
     server.onNotFound(notFound);
     server.begin();
