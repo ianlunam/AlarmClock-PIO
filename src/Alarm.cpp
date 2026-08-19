@@ -149,20 +149,13 @@ bool alarmTriggerNow()
             if (alarmHoliday and nextAlarm.skip_phols)
                 continue;
 
-            // Skip if today isn't enabled
-            if (currentTm.tm_wday == 0 and !nextAlarm.sunday)
-                continue;
-            if (currentTm.tm_wday == 1 and !nextAlarm.monday)
-                continue;
-            if (currentTm.tm_wday == 2 and !nextAlarm.tuesday)
-                continue;
-            if (currentTm.tm_wday == 3 and !nextAlarm.wednesday)
-                continue;
-            if (currentTm.tm_wday == 4 and !nextAlarm.thursday)
-                continue;
-            if (currentTm.tm_wday == 5 and !nextAlarm.friday)
-                continue;
-            if (currentTm.tm_wday == 6 and !nextAlarm.saturday)
+            // Skip if today isn't enabled. tm_wday is 0=Sunday..6=Saturday,
+            // matching this array's order.
+            bool dayEnabled[7] = {
+                nextAlarm.sunday, nextAlarm.monday, nextAlarm.tuesday,
+                nextAlarm.wednesday, nextAlarm.thursday, nextAlarm.friday,
+                nextAlarm.saturday};
+            if (!dayEnabled[currentTm.tm_wday])
                 continue;
 
             struct tm t = {0};
