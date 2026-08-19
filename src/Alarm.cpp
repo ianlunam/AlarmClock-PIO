@@ -1,5 +1,6 @@
 #include <time.h>
 #include "Alarm.h"
+#include "AlarmLogic.h"
 #include "Screamer.h"
 
 #include <TFT_eSPI.h>
@@ -129,9 +130,6 @@ bool alarmTriggerNow()
         return false; // Have we checked this minute?
     lastAlarmCheck = currentTm.tm_min;
 
-    currentTm.tm_sec = 0; // reset to first second of minute to make comparison easier
-    time_t currentTime = mktime(&currentTm);
-
     getAlarmList();
 
     for (int x = 0; x < 6; x++)
@@ -143,42 +141,19 @@ bool alarmTriggerNow()
         AlarmEntry nextAlarm = {};
         if (getAlarm(alarmList[x], nextAlarm))
         {
-            // Skip the alarm if ...
-            if (!nextAlarm.enabled)
-                continue;
-            if (alarmHoliday and nextAlarm.skip_phols)
+            if (!alarmMatchesNow(nextAlarm, currentTm, alarmHoliday))
                 continue;
 
-            // Skip if today isn't enabled. tm_wday is 0=Sunday..6=Saturday,
-            // matching this array's order.
-            bool dayEnabled[7] = {
-                nextAlarm.sunday, nextAlarm.monday, nextAlarm.tuesday,
-                nextAlarm.wednesday, nextAlarm.thursday, nextAlarm.friday,
-                nextAlarm.saturday};
-            if (!dayEnabled[currentTm.tm_wday])
-                continue;
-
-            struct tm t = {0};
-            t.tm_year = currentTm.tm_year; // Construct tm as per today for alarm time at zero seconds
-            t.tm_mon = currentTm.tm_mon;
-            t.tm_mday = currentTm.tm_mday;
-            t.tm_hour = nextAlarm.hour - currentTm.tm_isdst;
-            t.tm_min = nextAlarm.minute;
-            t.tm_sec = 0;
-            time_t alarmTime = mktime(&t); // convert to seconds
-            if (alarmTime == currentTime)
+            if (nextAlarm.once)
             {
-                if (nextAlarm.once)
-                {
-                    nextAlarm.enabled = false;
-                    AlarmStoreLock lock;
-                    Preferences preferences;
-                    preferences.begin("alarmStore", false);
-                    preferences.putBytes(nextAlarm.name, &nextAlarm, sizeof(nextAlarm));
-                    preferences.end();
-                }
-                return true;
+                nextAlarm.enabled = false;
+                AlarmStoreLock lock;
+                Preferences preferences;
+                preferences.begin("alarmStore", false);
+                preferences.putBytes(nextAlarm.name, &nextAlarm, sizeof(nextAlarm));
+                preferences.end();
             }
+            return true;
         }
     }
     return false;

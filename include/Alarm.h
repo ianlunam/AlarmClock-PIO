@@ -2,25 +2,9 @@
 #define Alarm_h
 #include <Display.h>
 #include "Ldr.h"
+#include "AlarmEntry.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
-
-struct AlarmEntry
-{
-  char name[20];
-  int hour;
-  int minute;
-  bool sunday;
-  bool monday;
-  bool tuesday;
-  bool wednesday;
-  bool thursday;
-  bool friday;
-  bool saturday;
-  bool skip_phols;
-  bool once;
-  bool enabled;
-};
 
 // The "alarmStore" Preferences (NVS) namespace is read and written from both
 // the web server task and the alarm-checking task. This guards it so the two
