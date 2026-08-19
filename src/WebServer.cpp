@@ -128,7 +128,7 @@ String alarmToTableRow(AlarmEntry &thisAlarm)
 
 bool getCurrentAlarm(char *name, AlarmEntry &newAlarm)
 {
-
+    AlarmStoreLock lock;
     Preferences alarmStore;
     alarmStore.begin("alarmStore", true);
 
@@ -137,9 +137,12 @@ bool getCurrentAlarm(char *name, AlarmEntry &newAlarm)
         int size = alarmStore.getBytesLength(name);
         if (size > 0)
         {
-            char *buf[size + 1];
+            char buf[size + 1];
             alarmStore.getBytes(name, &buf, size);
-            memcpy(&newAlarm, buf, size);
+            size_t copySize = (size_t)size;
+            if (copySize > sizeof(newAlarm))
+                copySize = sizeof(newAlarm);
+            memcpy(&newAlarm, buf, copySize);
             alarmStore.end();
             return true;
         }
@@ -156,7 +159,7 @@ void handleEdit(AsyncWebServerRequest *request)
         return;
     }
 
-    AlarmEntry alarmEntry;
+    AlarmEntry alarmEntry = {};
     if (getCurrentAlarm((char *)request->getParam("name")->value().c_str(), alarmEntry))
     {
         request->send(200, "text/html", configurator.editPage(alarmEntry));
@@ -181,8 +184,15 @@ void handleSave(AsyncWebServerRequest *request)
     }
 
     AlarmEntry alarmEntry = {"", 0, 0, false, false, false, false, false, false, false, false, false, false};
+    if (request->getParam("name")->value().length() >= sizeof(alarmEntry.name))
+    {
+        request->send(400, "text/html", "<html><p>Name too long (max 19 characters)</p></html>");
+        return;
+    }
+
+    AlarmStoreLock lock;
     Preferences preferences;
-    strcpy(alarmEntry.name, request->getParam("name")->value().c_str());
+    strncpy(alarmEntry.name, request->getParam("name")->value().c_str(), sizeof(alarmEntry.name) - 1);
     alarmEntry.hour = request->getParam("hour")->value().toInt();
     alarmEntry.minute = request->getParam("minute")->value().toInt();
     if (request->hasArg("sunday"))
@@ -234,9 +244,12 @@ void handleSave(AsyncWebServerRequest *request)
         int size = preferences.getBytesLength("alarms");
         if (size > 0)
         {
-            char *buf[size + 1];
+            char buf[size + 1];
             preferences.getBytes("alarms", &buf, size);
-            memcpy(&alarmList, buf, size);
+            size_t copySize = (size_t)size;
+            if (copySize > sizeof(alarmList))
+                copySize = sizeof(alarmList);
+            memcpy(&alarmList, buf, copySize);
         }
     }
     else
@@ -282,6 +295,7 @@ void handleDelete(AsyncWebServerRequest *request)
     }
 
     char alarmList[][20] = {"", "", "", "", "", ""};
+    AlarmStoreLock lock;
     Preferences preferences;
 
     preferences.begin("alarmStore", false);
@@ -290,9 +304,12 @@ void handleDelete(AsyncWebServerRequest *request)
         int size = preferences.getBytesLength("alarms");
         if (size > 0)
         {
-            char *buf[size + 1];
+            char buf[size + 1];
             preferences.getBytes("alarms", &buf, size);
-            memcpy(&alarmList, buf, size);
+            size_t copySize = (size_t)size;
+            if (copySize > sizeof(alarmList))
+                copySize = sizeof(alarmList);
+            memcpy(&alarmList, buf, copySize);
         }
     }
     else
@@ -319,6 +336,7 @@ void handleDelete(AsyncWebServerRequest *request)
 void handleRoot(AsyncWebServerRequest *request)
 {
     char alarmList[][20] = {"", "", "", "", "", ""};
+    AlarmStoreLock lock;
     Preferences preferences;
 
     preferences.begin("alarmStore", false);
@@ -327,9 +345,12 @@ void handleRoot(AsyncWebServerRequest *request)
         int size = preferences.getBytesLength("alarms");
         if (size > 0)
         {
-            char *buf[size + 1];
+            char buf[size + 1];
             int result = preferences.getBytes("alarms", &buf, size);
-            memcpy(&alarmList, buf, size);
+            size_t copySize = (size_t)size;
+            if (copySize > sizeof(alarmList))
+                copySize = sizeof(alarmList);
+            memcpy(&alarmList, buf, copySize);
         }
     }
     else
@@ -350,7 +371,7 @@ void handleRoot(AsyncWebServerRequest *request)
     response->print("<tr><th>Name</th><th>Time</th><th>&nbsp</th><th>&nbsp</th><th>&nbsp</th><th>&nbsp</th><th>&nbsp</th><th>&nbsp</th><th>&nbsp</th><th>Skip Holidays</th><th>Once Only</th><th>Enabled</th><th>Change</th></tr>\n");
     for (int x = 0; x < 6; x++)
     {
-        AlarmEntry myAlarm;
+        AlarmEntry myAlarm = {};
         if (getCurrentAlarm(alarmList[x], myAlarm))
         {
             response->print(alarmToTableRow(myAlarm));

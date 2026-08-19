@@ -23,6 +23,8 @@ ButtonWidget *stopButton;
 char alarmList[][20] = {"", "", "", "", "", ""};
 int lastAlarmCheck = 100;
 
+SemaphoreHandle_t alarmStoreMutex = xSemaphoreCreateRecursiveMutex();
+
 TaskHandle_t alarmTaskHandle = NULL;
 
 char stop_text[] = "Stop";
@@ -32,6 +34,7 @@ Alarm::Alarm() {}
 
 void getAlarmList()
 {
+    AlarmStoreLock lock;
     Preferences preferences;
 
     preferences.begin("alarmStore", false);
@@ -40,9 +43,15 @@ void getAlarmList()
         int size = preferences.getBytesLength("alarms");
         if (size > 0)
         {
-            char *buf[size + 1];
+            char buf[size + 1];
             preferences.getBytes("alarms", &buf, size);
-            memcpy(&alarmList, buf, size);
+            // Never copy more than alarmList can hold, even if the stored
+            // data is a different size than expected (e.g. after a firmware
+            // change or downgrade).
+            size_t copySize = (size_t)size;
+            if (copySize > sizeof(alarmList))
+                copySize = sizeof(alarmList);
+            memcpy(&alarmList, buf, copySize);
             preferences.end();
             return;
         }
@@ -58,6 +67,7 @@ void getAlarmList()
 
 bool getAlarm(char *name, AlarmEntry &newAlarm)
 {
+    AlarmStoreLock lock;
     getAlarmList();
 
     bool inList = false;
@@ -82,9 +92,12 @@ bool getAlarm(char *name, AlarmEntry &newAlarm)
         int size = alarmStore.getBytesLength(name);
         if (size > 0)
         {
-            char *buf[size + 1];
+            char buf[size + 1];
             int result = alarmStore.getBytes(name, &buf, size);
-            memcpy(&newAlarm, buf, size);
+            size_t copySize = (size_t)size;
+            if (copySize > sizeof(newAlarm))
+                copySize = sizeof(newAlarm);
+            memcpy(&newAlarm, buf, copySize);
             alarmStore.end();
             return true;
         }
@@ -115,7 +128,7 @@ bool alarmTriggerNow()
         {
             continue;
         }
-        AlarmEntry nextAlarm;
+        AlarmEntry nextAlarm = {};
         if (getAlarm(alarmList[x], nextAlarm))
         {
             // Skip the alarm if ...
@@ -153,6 +166,7 @@ bool alarmTriggerNow()
                 if (nextAlarm.once)
                 {
                     nextAlarm.enabled = false;
+                    AlarmStoreLock lock;
                     Preferences preferences;
                     preferences.begin("alarmStore", false);
                     preferences.putBytes(nextAlarm.name, &nextAlarm, sizeof(nextAlarm));
