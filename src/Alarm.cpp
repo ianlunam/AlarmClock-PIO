@@ -21,13 +21,15 @@ XPT2046_Touchscreen ts(XPT2046_CS, XPT2046_IRQ);
 
 // Raw XPT2046 touch ADC range for this panel, mapped below to the screen's
 // pixel dimensions so touches can be hit-tested against a widget's actual
-// on-screen position and size, instead of a hand-picked coordinate box. If
-// touches don't land where expected, touch each screen corner, print
-// ts.getPoint().x/.y over Serial, and adjust these four numbers to match.
-const int16_t TOUCH_RAW_X_MIN = 200;
-const int16_t TOUCH_RAW_X_MAX = 2700;
-const int16_t TOUCH_RAW_Y_MIN = 300;
-const int16_t TOUCH_RAW_Y_MAX = 1000;
+// on-screen position and size, instead of a hand-picked coordinate box.
+// Measured directly on the real device (5-point calibration: each screen
+// corner plus center). If touches ever drift out of alignment again (e.g.
+// a different panel), touch each screen corner, print ts.getPoint().x/.y
+// over Serial, and adjust these four numbers to match.
+const int16_t TOUCH_RAW_X_MIN = 180;
+const int16_t TOUCH_RAW_X_MAX = 3700;
+const int16_t TOUCH_RAW_Y_MIN = 180;
+const int16_t TOUCH_RAW_Y_MAX = 3760;
 
 ButtonWidget *stopButton;
 
