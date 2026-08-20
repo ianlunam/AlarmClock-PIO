@@ -1,5 +1,9 @@
-Unit tests for this project
+Tests for this project
 
+There are two kinds, run two different ways.
+
+Pure-logic tests (on your PC)
+------------------------------
 Run with:
 
     pio test -e native
@@ -7,8 +11,7 @@ Run with:
 This runs on your own machine, not the ESP32 - no flashing, no hardware
 needed, seconds instead of minutes.
 
-Why only some code is tested
------------------------------
+Why only some code is tested this way
 Almost everything in src/ talks directly to hardware (TFT_eSPI, Preferences/
 NVS, analogRead, WiFi, LEDC), inline in the same functions as the actual
 decision logic. That can't be unit tested without a lot of mocking, and
@@ -25,8 +28,7 @@ specifically so it can compile under `platform = native` in platformio.ini:
 - LdrHysteresis.h/.cpp - the backlight hysteresis/debounce decision
 - WeatherIconShape.h/.cpp - weather condition string -> icon shape
 
-Adding another one
--------------------
+Adding another one:
 1. Pull the pure decision (no hardware calls) into its own .h/.cpp under
    include/ and src/, taking plain data in and returning plain data out.
 2. Add it to the native env's build_src_filter in platformio.ini
@@ -36,3 +38,33 @@ Adding another one
    RUN_TESTs them).
 4. The ESP32 build (env:esp32dev) picks up the new .cpp automatically -
    nothing to do there.
+
+Hardware-in-the-loop tests (on the real device)
+-------------------------------------------------
+Run with:
+
+    pio test -e esp32dev_test -f test_hardware --upload-port /dev/ttyACM0
+
+(swap the port for whatever the device actually enumerates as - omit
+--upload-port to let PlatformIO auto-detect if there's only one board
+plugged in). This builds test/test_hardware, flashes it to the real ESP32,
+and reads pass/fail back over serial - takes tens of seconds, not seconds,
+and needs the board connected over USB.
+
+The -f test_hardware filter matters: without it, `pio test -e esp32dev_test`
+also tries to build the *native* suites above against this environment and
+they fail to link (they use a plain main(), not Arduino's setup()/loop()).
+That's an invocation mistake, not a real failure - always pass the filter
+for this environment.
+
+What's covered here: things that need real hardware and can't be tested
+natively - an actual sensor pin (LDR), real flash storage (Preferences/NVS,
+using its own "testStore" namespace so it never touches real alarms), and
+real concurrent FreeRTOS tasks on real cores fighting over a mutex (a direct
+regression test for the class of bug that caused the random reboots fixed by
+DisplayLock - see git log for "serialize all access to the shared TFT_eSPI
+display").
+
+This is deliberately not comprehensive - it's not testing the display,
+touchscreen, WiFi, or MQTT, because "does it work" for those is what
+actually running the device already answers every time you flash it.

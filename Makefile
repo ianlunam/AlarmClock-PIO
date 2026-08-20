@@ -5,7 +5,7 @@
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build upload upload-ota flash test monitor clean
+.PHONY: help build upload upload-ota flash test hardware-test monitor clean
 
 help: ## Show this help
 	@echo "Available targets:"
@@ -25,6 +25,9 @@ flash: upload ## Alias for `upload`
 
 test: ## Run the pure-logic unit tests on this machine (no hardware needed, see test/README)
 	pio test -e native
+
+hardware-test: ## Flash and run the hardware-in-the-loop test suite on the real device (see test/README)
+	pio test -e esp32dev_test -f test_hardware
 
 monitor: ## Open the serial monitor (115200 baud, matches platformio.ini)
 	pio device monitor
