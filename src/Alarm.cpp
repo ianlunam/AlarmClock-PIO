@@ -181,8 +181,11 @@ void scream()
     alarmActive = true;
     screamer.start();
 
-    stopButton->initButtonUL(10, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, stop_text, 2);
-    stopButton->drawSmoothButton(false, 3, TFT_BLACK);
+    {
+        DisplayLock lock;
+        stopButton->initButtonUL(10, 100, 150, 60, TFT_BLUE, TFT_RED, TFT_BLACK, stop_text, 2);
+        stopButton->drawSmoothButton(false, 3, TFT_BLACK);
+    }
 
     for (;;)
     {
@@ -196,8 +199,11 @@ void scream()
     vTaskDelay(500 / portTICK_PERIOD_MS);
     alarmDisplay.set_backlight(BL_MAX);
 
-    stopButton->initButtonUL(10, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, stop_text, 2);
-    stopButton->drawSmoothButton(false, 3, TFT_BLACK);
+    {
+        DisplayLock lock;
+        stopButton->initButtonUL(10, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, stop_text, 2);
+        stopButton->drawSmoothButton(false, 3, TFT_BLACK);
+    }
 
     // Only let the idle-screen tasks resume drawing over this area once the
     // button is actually gone.
@@ -211,8 +217,11 @@ void alarm_clock(void *pvParameters)
 
     // Black with black surround and black text, for now.
     stopButton = new ButtonWidget(&tft);
-    stopButton->initButtonUL(10, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, stop_text, 2);
-    stopButton->drawSmoothButton(false, 3, TFT_BLACK);
+    {
+        DisplayLock lock;
+        stopButton->initButtonUL(10, 100, 150, 60, TFT_BLACK, TFT_BLACK, TFT_BLACK, stop_text, 2);
+        stopButton->drawSmoothButton(false, 3, TFT_BLACK);
+    }
 
     for (;;)
     {

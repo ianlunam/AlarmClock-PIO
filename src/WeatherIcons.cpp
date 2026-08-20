@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "WeatherIcons.h"
 #include "WeatherIconShape.h"
+#include "Display.h"
 
 // All icons are drawn on a fixed 44x44 logical grid (icon-local coordinates,
 // origin top-left) which is then centred inside whatever sprite is passed
@@ -118,6 +119,7 @@ namespace
 
 void updateWeatherIcon(TFT_eSprite *sprite, const String &conditionIn, uint16_t x, uint16_t y)
 {
+    DisplayLock lock;
     sprite->fillSprite(BACKGROUND_COLOUR);
 
     WeatherIconShape shape = mapConditionToShape(conditionIn.c_str());

@@ -5,6 +5,8 @@
 
 TFT_eSPI tft = TFT_eSPI();
 
+SemaphoreHandle_t displayMutex = xSemaphoreCreateMutex();
+
 #define LEDC_CHANNEL_0 0
 #define LEDC_TIMER_12_BIT 12
 #define LEDC_BASE_FREQ 5000

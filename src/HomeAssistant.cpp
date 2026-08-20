@@ -45,6 +45,7 @@ String lastHumidity = "";
 
 
 void initSprite(TFT_eSprite *sprite, uint16_t width, uint16_t height,  uint16_t x, uint16_t y) {
+    DisplayLock lock;
     sprite->createSprite(width, height);
     sprite->setColorDepth(8);
     sprite->setFreeFont(&FreeSansBold12pt7b);
@@ -55,6 +56,7 @@ void initSprite(TFT_eSprite *sprite, uint16_t width, uint16_t height,  uint16_t 
 
 void updateSprite(TFT_eSprite *sprite, char value[], uint16_t x, uint16_t y)
 {
+    DisplayLock lock;
     sprite->fillSprite(BACKGROUND_COLOUR);
     sprite->setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
     sprite->drawString(value, 0, 0);

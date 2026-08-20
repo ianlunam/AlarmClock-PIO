@@ -25,10 +25,13 @@ void display_time(void *pvParameters)
 
     uint32_t x = (320 / 2) - (width / 2);
 
-    spr.createSprite(width, height);
-    spr.fillSprite(BACKGROUND_COLOUR);
-    spr.setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
-    spr.pushSprite(x, 15);
+    {
+        DisplayLock lock;
+        spr.createSprite(width, height);
+        spr.fillSprite(BACKGROUND_COLOUR);
+        spr.setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
+        spr.pushSprite(x, 15);
+    }
 
     bool forceRedraw = false;
     for (;;)
@@ -50,6 +53,7 @@ void display_time(void *pvParameters)
         {
             forceRedraw = false;
             strncpy(lastValue, ptr, 20);
+            DisplayLock lock;
             spr.fillSprite(BACKGROUND_COLOUR);
             uint32_t len = spr.drawString(ptr, 0, 0);
             uint32_t start = (width / 2) - (len / 2);
@@ -83,15 +87,18 @@ void display_dow(void *pvParameters)
     uint32_t dateX = 100;
     uint32_t dateY = 132;
 
-    dowSprite.createSprite(width, height);
-    dowSprite.fillSprite(BACKGROUND_COLOUR);
-    dowSprite.setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
-    dowSprite.pushSprite(dowX, dowY);
+    {
+        DisplayLock lock;
+        dowSprite.createSprite(width, height);
+        dowSprite.fillSprite(BACKGROUND_COLOUR);
+        dowSprite.setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
+        dowSprite.pushSprite(dowX, dowY);
 
-    dateSprite.createSprite(width, height);
-    dateSprite.fillSprite(BACKGROUND_COLOUR);
-    dateSprite.setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
-    dateSprite.pushSprite(dateX, dateY);
+        dateSprite.createSprite(width, height);
+        dateSprite.fillSprite(BACKGROUND_COLOUR);
+        dateSprite.setTextColor((TEXT_R << (5 + 6)) | (TEXT_G << 5) | TEXT_B);
+        dateSprite.pushSprite(dateX, dateY);
+    }
 
     bool forceRedraw = false;
     for (;;)
@@ -110,6 +117,7 @@ void display_dow(void *pvParameters)
             forceRedraw = false;
             lastDoW = clockTimeInfo.tm_wday;
 
+            DisplayLock lock;
             char dowPtr[20];
             strftime(dowPtr, 20, "%a", &clockTimeInfo);
             dowSprite.fillSprite(BACKGROUND_COLOUR);
